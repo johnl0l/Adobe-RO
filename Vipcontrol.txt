@@ -1,0 +1,185 @@
+prontera,143,173,5	script	Vip Control	864,{
+if (getgmlevel() < 99){
+mes "[Vip Control]";
+mes "Somente os Administradores podem usar meus serviços.";
+close;
+}
+mes "[Vip Control]";
+mes "Olá senhor "+ strcharinfo(0) +"!";
+mes "Qual dos meus serviços deseja utilizar?";
+next;
+switch (select ("- Adicionar VIPs","- Deletar VIPs","- Listar VIPs","- Modificar VIPs","- Cancelar")){
+
+case 1:
+mes "[Vip Control]";
+mes "Não se esqueça de inserir todos os dados necessários!";
+next;
+mes "[Vip Control]";
+mes "Insira o Login da conta:";
+next;
+input @Login$;
+mes "[Vip Control";
+mes "Vou verificar se a conta existe.";
+next;
+query_sql "SELECT `userid` FROM `login` WHERE `userid` = '"+ @Login$ +"'", @logid$;
+if (!getarraysize(@logid$)){
+mes "[Vip Control]";
+mes "Essa Conta não existe em nossa Database.";
+close;
+}
+mes "[Vip Control]";
+mes "Tudo Ok, agora vou ver se essa conta já é Vip, aguarde um momento.";
+next;
+query_sql "SELECT `vip_id` FROM `viptable` WHERE `vip_id` = '"+ @Login$ +"'", @checkid$;
+if (getarraysize(@checkid$)){
+mes "[Vip Control]";
+mes "Essa Conta já é uma conta VIP.";
+close;
+}
+mes "[Vip Control]";
+mes "Ok, pode prosseguir com o VIP.";
+next;
+// Level do Vip
+mes "[Vip Control]";
+mes "Insira o Level do VIP: (Max: 3)";
+next;
+input @Level;
+if (@Level <= 0) close;
+if (@Level > 3){
+mes "[Vip Control]";
+mes "O level do VIP não pode ser maior que 3.";
+close;
+}
+
+// Dias de Vip
+mes "[Vip Control]";
+mes "Insira os Dias de VIP: (Max: 365)";
+input @Dias;
+if (@Dias > 365){
+mes "[Vip Control]";
+mes "Você não pode dar mais de 1 ano de VIP por conta.";
+close;
+}
+
+
+// Inserindo VIP na DB
+query_sql "SELECT `account_id` FROM `login` WHERE `userid` = '"+ @Login$ +"'", @AccID;
+query_sql "INSERT INTO `viptable` (`vipacc_id`, `vip_id`, `days`) VALUES ('"+ @AccID +"', '"+ @Login$ +"', '"+ @Dias +"')";
+query_sql "UPDATE `login` SET `level` = '"+ @Level +"' WHERE `userid` = '"+ @Login$ +"'";
+next;
+mes "[Vip Control]";
+mes "Vip inserido com Sucesso!";
+atcommand "@reloadpcdb";
+close;
+
+case 2:
+mes "[Vip Control]";
+mes "Insira o Login da Conta VIP:";
+next;
+input @Login$;
+query_sql "SELECT `vip_id` FROM `viptable` WHERE `vip_id` = '"+ @Login$ +"'", @delid$;
+if (!getarraysize(@delid$)){
+mes "[Vip Control]";
+mes "Esta conta VIP não existe.";
+close;
+}
+query_sql "DELETE FROM `viptable` WHERE `vip_id` = '"+ @Login$ +"'";
+query_sql "UPDATE `login` SET `level` = '0' WHERE `userid` = '"+ @Login$ +"'";
+atcommand "@reloadpcdb";
+next;
+mes "[Vip Control]";
+mes "Vip Deletado com Sucesso!";
+close;
+
+case 3:
+query_sql "SELECT COUNT(1) FROM `login` WHERE `sex` != 'S' AND `level` <= '3'", @Total;
+mes "[VIP Control]";
+mes "Temos um Total de: ^00FF00"+ @Total +"^000000";
+mes "Que são:";
+query_sql "SELECT `viptable`.`vipacc_id`, `viptable`.`vip_id`, `viptable`.`days` FROM `viptable` LEFT JOIN `login` ON `viptable`.`vipacc_id` = `login`.`account_id` ORDER BY `days` DESC LIMIT 100", @AccID, @Login$, @Dias;
+for(set @i, 0; @i < getarraysize(@Login$); set @i, @i + 1){
+mes @i+1+". "+@Login$[@i]+" - "+@Dias[@i]+" dias restantes.";
+}
+close;
+
+case 4:
+mes "[Vip Control]";
+mes "Deseja Alterar oque?";
+next;
+switch(select ("- Dias do VIP","- Level do VIP")){
+
+case 1:
+mes "[Vip Control]";
+mes "Insira o Login da Conta VIP:";
+input @Login$;
+query_sql "SELECT `vip_id` FROM `viptable` WHERE `vip_id` = '"+ @Login$ +"'", @alterid$;
+if (!getarraysize(@alterid$)){
+mes "[Vip Control]";
+mes "Esta conta VIP não existe.";
+close;
+}
+
+query_sql "SELECT `days` FROM `viptable` WHERE `vip_id` = '"+ @Login$ +"'", @Restante;
+mes "[Vip Control]";
+mes "Esta conta ainda tem "+ @Restante +" dias de VIP.";
+mes "Insira o novo número de dias: (Max: 365)";
+input @Dias;
+if (@Dias > 365){
+mes "[Vip Control]";
+mes "Você não pode dar mais de 1 ano aos VIPs.";
+close;
+}
+query_sql "UPDATE `viptable` SET `days` = '"+ @Dias +"' WHERE `vip_id` = '"+ @Login$ +"'";
+mes "[Vip Control]";
+mes "Dias Alterados com sucesso!";
+next;
+mes "[Vip Control]";
+mes "O novo número de dias desta conta VIP é: "+ @Dias +".";
+close;
+
+case 2:
+mes "[Vip Control]";
+mes "Insira o Login da Conta:";
+input @Login$;
+query_sql "SELECT `vip_id` FROM `viptable` WHERE `vip_id` = '"+ @Login$ +"'", @levelid$;
+if (!getarraysize(@levelid$)){
+mes "[Vip Control]";
+mes "Esta conta VIP não existe.";
+close;
+}
+mes "[Vip Control]";
+mes "Insira o NOVO level da conta:";
+input @Level;
+if (@Level > 3){
+mes "[Vip Control]";
+mes "O level do VIP não pode ser maior que 3!";
+close;
+}
+query_sql "UPDATE `login` SET `level` = '"+ @Level +"' WHERE `userid` = '"+ @Login$ +"'";
+mes "[Vip Control]";
+mes "Level do VIP alterado com sucesso.";
+next;
+mes "[Vip Control]";
+mes "O novo level da conta vip é: "+ @Level +".";
+atcommand "@reloadpcdb";
+close;
+default:
+mes "[Vip Control]";
+mes "^FF0000- ERRO -^000000";
+mes "Contacte o Administrador para solução, e tire uma SS deste menu.";
+close;
+}
+
+
+case 5:
+mes "[Vip Control]";
+mes "Volte quando quiser!";
+close;
+
+default:
+mes "[Vip Control]";
+mes "^FF0000- ERRO -^000000";
+mes "Contacte o Administrador para solução, e tire uma SS deste menu.";
+close;
+}
+}

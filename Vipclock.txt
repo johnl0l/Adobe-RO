@@ -1,0 +1,59 @@
+//(=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=)
+//(                       Banned Presents                       )
+//(      __________                                 .___        )
+//(      \______   \_____    ____   ____   ____   __| _/        )
+//(       |    |  _/\__  \  /    \ /    \_/ __ \ / __ |         )
+//(       |    |   \ / __ \|   |  \   |  \  ___// /_/ |         )
+//(       |______  /(____  /___|  /___|  /\___  >____ |         )
+//(              \/      \/     \/     \/     \/     \/         )
+//(                                                             )
+//(              -- [S] [c] [r] [i] [p] [t] [s] --              )
+//(   _   _   _   _   _   _   _     _   _   _   _   _   _   _   )
+//(  / \ / \ / \ / \ / \ / \ / \   / \ / \ / \ / \ / \ / \ / \  )
+//( ( e | A | t | h | e | n | a ) ( S | c | r | i | p | t | s ) )
+//(  \_/ \_/ \_/ \_/ \_/ \_/ \_/   \_/ \_/ \_/ \_/ \_/ \_/ \_/  )
+//(                                                             )
+//(                  Advanced NPCs (c)2005-2007                 )
+//(                http://bnetwork.deltaanime.net               )
+//(=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=)
+//====== eAthena Script ========================================
+//= Vip Control
+//===== Por ====================================================
+//= [Banned]
+//===== Versão =================================================
+//= 2.0.a
+//===== Compativel Com =========================================
+//= eAthena SVN e CRONUS
+//===== Descrição ==============================================
+//= Permite que você administre o sistema vip do seu servidor
+//===== Comentários ============================================
+//= 1.0 - NPC Criado				       [Banned]
+//= 1.0.a - Fix no check de GMs			       [Banned]
+//= 2.0.a - Modificado por Panda. www.pandabro.com
+//==============================================================
+-	script	VipClock	-1,{
+	end;
+	
+OnClock0000:
+	query_sql "UPDATE `viptable` SET `days` = `days` - '1'";
+	end;
+}
+
+-	script	OnPCLoginEvent	-1,{
+OnPCLoginEvent:	
+	if (getgmlevel() < 1 || getgmlevel() > 3) end;
+	query_sql "SELECT `days` FROM `viptable` WHERE `vipacc_id` = '"+ getcharid(3) +"'", @Dias;
+	if (@Dias <= 0){
+	query_sql "DELETE FROM `viptable` WHERE `vipacc_id` = '"+ getcharid(3) +"'";
+	query_sql "UPDATE `login` SET `level` = '0' WHERE `account_id` = '"+ getcharid(3) +"'";
+	atcommand "@reloadpcdb";
+	mes "[Misa-RO Controle]";
+	mes "Desculpe, seus dias VIPs acabaram, obrigado por ser um jogador vip do Misa-RO.";
+	close;
+	}
+
+	// Mensagem ao Logar
+	mes "[Misa-RO]";
+	mes "Você ainda tem "+@Dias+" de VIP sobrando.";
+	close;
+}

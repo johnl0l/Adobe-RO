@@ -1,0 +1,27 @@
+/*
+________________     ______            ________       
+___    |_____  /________  /______      ___  __ \_____ 
+__  /| |  __  /_  __ \_  __ \  _ \     __  /_/ /  __ \
+_  ___ / /_/ / / /_/ /  /_/ /  __/     _  _, _// /_/ /
+/_/  |_\__,_/  \____//_.___/\___/      /_/ |_| \____/ 
+
+*/
+
+prontera,188,208,5	script	Skull Buyer	792,{
+mes "I am a Player Skull Buyer.";
+mes "I'm going to buy all your skulls for^FF0000 8k^000000";
+mes "But how many skull that you will sell to me?";
+next;
+mes "Please Input the Skull that you want to sell it.";
+mes "Input 0 to cancel.";
+input @amount,0,countitem(7420);
+if ( @amount == 0 ){
+mes "You have choose to cancel the Deal.";
+close;
+}
+delitem 7420,@amount;
+set Zeny,Zeny+(@amount*8000);
+message strcharinfo(0),"You have gained "+(@amount*8000)+" Zeny.";
+close;
+}
+sec_in02,146,173,2	duplicate(Skull Buyer)	Skull Buyer#sec	792
