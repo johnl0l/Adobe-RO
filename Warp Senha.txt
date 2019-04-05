@@ -1,0 +1,75 @@
+/*
+________________     ______            ________       
+___    |_____  /________  /______      ___  __ \_____ 
+__  /| |  __  /_  __ \_  __ \  _ \     __  /_/ /  __ \
+_  ___ / /_/ / / /_/ /  /_/ /  __/     _  _, _// /_/ /
+/_/  |_\__,_/  \____//_.___/\___/      /_/ |_| \____/ 
+
+*/
+
+prontera,136,168,5	script	Warp 	45,1,1,{
+
+OnTouch:
+
+mes "Acerte a senha para entrar na sala secreta.";
+
+input @sw$;
+
+if(@sw$ =="foN") {
+
+mes "Pronto, Boa Viagem.";
+
+close2;
+
+warp "sec_in02",137,161;
+
+end;
+
+}else{
+
+mes "Senha incorreta.";
+
+close;
+
+}
+
+end;
+
+}
+sec_in02.gat,128,161,4	warp	tmallout	2,2,prontera.gat,156,179
+
+//============================================================
+sec_in02.gat,127,168,2	script	Segurança		734,30,30,{
+//============================================================
+//=== Configuração =======
+set $@lvip, 1; // - Coloque aqui o level de vip do seu servidor. (Padrão: 1)
+set $@lvpl, 0; // - Coloque aqui o level de jogadores normal de seu servidor. (Padrão: 0)
+
+//=== Inicio do Script ===
+if (getgroupid() > $@lvip) {
+mes "[^FF0000 Segurança VIP ^000000]";
+mes "Você tem autorização para entrar!";
+close;
+}
+OnTouch:
+if (getgroupid() == $@lvpl) {
+mes "[^FF0000 Segurança VIP ^000000]";
+mes "Você entrou em uma área proibida, saia imediatamente!";
+close2;
+warp "prontera",0,0;
+}
+end;
+}
+
+
+sec_in02	mapflag	nowarp
+sec_in02	mapflag	nowarpto
+sec_in02	mapflag	noteleport
+sec_in02	mapflag	monster_noteleport
+sec_in02	mapflag	nosave
+sec_in02	mapflag	nomemo
+sec_in02	mapflag	nobranch
+sec_in02	mapflag	nopenalty
+sec_in02	mapflag	noreturn
+sec_in02	mapflag	hidemobhpbar
+sec_in02	mapflag	fog
