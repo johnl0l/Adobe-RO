@@ -1,0 +1,232 @@
+//- Entrada do Evento.
+prontera,147,158,6	script	Homem das Selvas#st	4_M_UMCHIEF,{
+
+set @name$,"[^0065DF Homem das Selvas ^000000]"; //- Nome do NPC.
+set $premio,"1000000"; //- Quantiadde de Zenys dada aos vencedores padrão 20kk.
+
+specialeffect 417;
+mes @name$;
+mes "Deseja ir ao território do Homem Macaco?";
+next;
+switch(select("Sim:Homem Macaco que isso?:Não, obrigado")) {
+
+	case 1:
+		//- Checando se o Evento está Ligado.
+		if($open == 0){
+		mes @name$;
+		mes "Sinto muito, mas o evento está fechado no momento.";
+		close;
+		}
+		//- Removedor de Buffs , Carrinhos , Falcões e Montarias.
+		sc_end SC_ALL;
+		setcart 0;
+		setfalcon 0;
+		setmounting 0;
+		//- Checagem e Remoção Temporária de Homunculus.
+		if (checkhomcall() == 0) { atcommand "@useskill 244 1 "+strcharinfo(0);
+		dispbottom "[ Homem das Selvas ] : Homunculus são proibidos neste local!";
+		dispbottom "[ Homem das Selvas ] : por isso usei o [ Vaporizar ] para você !"; next;
+		}
+		//- Chacagem de uso de Pets.
+		if (getpetinfo(2) != "null") {
+		mes @name$;
+		mes "Por favor, remova o Pet para entrar no Evento.";
+		close;
+		}
+			mes @name$;
+			mes "Certo, irei te teleportar para lá. Boa Sorte!";
+			warp "safari",48,48;
+			announce "[ Homem das Selvas ] O Jogador "+strcharinfo(0)+" acaba de entrar no Território do Homem Macaco!!",bc_all;
+			close;
+	
+	case 2:
+		mes @name$;
+		mes "Isso mesmo, homem macaco é um evento aqui em nosso servidor.";
+		mes "E ele funciona da seguinte maneira";
+		next;
+		mes @name$;
+		mes "Assim que o evento se iniciar, 1 monstro chamado Homem Macaco é invocado no mapa do evento.";
+		mes "E você deve fugir dele para sobreviver.";
+		next;
+		mes @name$;
+		mes "A cada 1 Minuto 1 baú de tesouros é invocado no mapa e você deve apanha-lo como prêmio.";
+		next;
+		mes @name$;
+		mes "Serão 5 rounds super dificeis fugindo de homens macacos que serão invocados de tempos em tempos.";
+		next;
+		mes @name$;
+		mes "E no final, os últimos sobreviventes ganharam uma quantidade de Zenys por Participar !";
+		mes "Fora o que conseguirem quebrando os baús de tesouros...";
+		mes "Enfim, é isso .-.";
+		close;
+		
+	case 3:			
+		mes @name$;
+		mes "Uma pena, o evento é bem legal!";
+		close;
+		
+	OnInit:
+		waitingroom "Evento Homem Macaco",0;       // Balão Chat
+		set $open,0;                          // Closed de Evento Não Mexer.
+		end;
+	}
+}
+
+-	script	Macaco#evt	-1,{
+
+OnBoxBreak:
+	set .monkeytrasurex1,rand(41,57);
+	set .monkeytrasurex2,rand(41,57);
+	set .monkeytrasurex3,rand(41,57);
+	set .monkeytrasurex4,rand(41,57);
+	set .monkeytrasurex5,rand(41,57);
+	set .monkeytrasurex6,rand(41,57);
+	set .monkeytrasurex7,rand(41,57);
+	set .monkeytrasurex8,rand(41,57);
+	set .monkeytrasurex9,rand(41,57);
+	set .monkeytrasurex10,rand(41,57);
+	set .monkeytrasurex11,rand(41,57);
+	set .monkeytrasurex12,rand(41,57);
+	set .monkeytrasurex13,rand(41,57);
+	set .monkeytrasurex14,rand(41,57);
+	set .monkeytrasurex15,rand(41,57);
+	set .monkeytrasurey1,rand(40,55);
+	set .monkeytrasurey2,rand(40,55);
+	set .monkeytrasurey3,rand(40,55);
+	set .monkeytrasurey4,rand(40,55);
+	set .monkeytrasurey5,rand(40,55);
+	set .monkeytrasurey6,rand(40,55);
+	set .monkeytrasurey7,rand(40,55);
+	set .monkeytrasurey8,rand(40,55);
+	set .monkeytrasurey9,rand(40,55);
+	set .monkeytrasurey10,rand(40,55);
+	set .monkeytrasurey11,rand(40,55);
+	set .monkeytrasurey12,rand(40,55);
+	set .monkeytrasurey13,rand(40,55);
+	set .monkeytrasurey14,rand(40,55);
+	set .monkeytrasurey15,rand(40,55);
+	makeitem 18000,1,"safari",.monkeytrasurex1,.monkeytrasurey1;
+	makeitem 513,12,"safari",.monkeytrasurex11,.monkeytrasurey11;
+	makeitem 513,12,"safari",.monkeytrasurex12,.monkeytrasurey12;
+	makeitem 513,12,"safari",.monkeytrasurex13,.monkeytrasurey13;
+	makeitem 513,12,"safari",.monkeytrasurex14,.monkeytrasurey14;
+	makeitem 513,12,"safari",.monkeytrasurex15,.monkeytrasurey15;
+	makeitem 513,12,"safari",.monkeytrasurex11,.monkeytrasurey11;
+	makeitem 513,12,"safari",.monkeytrasurex12,.monkeytrasurey12;
+	makeitem 513,12,"safari",.monkeytrasurex13,.monkeytrasurey13;
+	makeitem 513,12,"safari",.monkeytrasurex14,.monkeytrasurey14;
+	makeitem 513,12,"safari",.monkeytrasurex15,.monkeytrasurey15;
+	end;
+
+//Horário de ínicio do evento 4 em 4 horas.
+OnClock0000:
+OnClock0400:
+OnClock0800:
+OnClock1200:
+OnClock1600:
+OnClock2000:
+
+initnpctimer;
+announce "[Homem das Selvas] O Evento Homem Macaco iniciará em 5 Minutos !",bc_all,0xADD8E6;
+set $open,1;
+end;
+
+OnTimer60000:
+announce "[Homem das Selvas] Em 4 minutos o Evento iniciará , apressem-se !",bc_all,0xADD8E6;
+end;
+
+OnTimer120000:
+announce "[Homem das Selvas] Em 3 minutos o Evento iniciará , apressem-se !",bc_all,0xADD8E6;
+end;
+
+OnTimer180000:
+announce "[Homem das Selvas] Em 2 minutos o Evento iniciará , apressem-se !",bc_all,0xADD8E6;
+end;
+
+OnTimer240000:
+announce "[Homem das Selvas] Em 1 minuto o Evento iniciará , apressem-se !",bc_all,0xADD8E6;
+end;
+
+OnTimer300000:
+set $open,0;
+announce "[Homem das Selvas] O 1º Round Começou !",bc_all,0xADD8E6;
+monster "safari",48,48,"Homem Macaco",1585,1;
+end;
+
+OnTimer360000:
+mapannounce "safari","[Homem das Selvas] 1 Baú de Tesouro foi derrubado pelo Homem Macaco !",bc_map,0xADD8E6;
+sleep2 1000;
+monster "safari",48,48,"Baú do Tesouro",1798,1,"Macaco#evt::OnBoxBreak";
+sleep2 1000;
+mapannounce "safari","[Homem das Selvas] 2º Round Começou !",bc_map,0xADD8E6;
+monster "safari",48,48,"Homem Macaco",1585,1;
+end;
+
+OnTimer420000:
+mapannounce "safari","[Homem das Selvas] 1 Baú de Tesouro foi derrubado pelo Homem Macaco !",bc_map,0xADD8E6;
+sleep2 1000;
+monster "safari",48,48,"Baú do Tesouro",1798,1,"Macaco#evt::OnBoxBreak";
+sleep2 1000;
+mapannounce "safari","[Homem das Selvas] 3º Round Começou !",bc_map,0xADD8E6;
+monster "safari",48,48,"Homem Macaco",1585,1;
+end;
+
+OnTimer480000:
+mapannounce "safari","[Homem das Selvas] 1 Baú de Tesouro foi derrubado pelo Homem Macaco !",bc_map,0xADD8E6;
+sleep2 1000;
+monster "safari",48,48,"Baú do Tesouro",1798,1,"Macaco#evt::OnBoxBreak";
+sleep2 1000;
+mapannounce "safari","[Homem das Selvas] 4º Round Começou !",bc_map,0xADD8E6;
+monster "safari",48,48,"Homem Macaco",1585,1;
+end;
+
+OnTimer540000:
+mapannounce "safari","[Homem das Selvas] 1 Baú de Tesouro foi derrubado pelo Homem Macaco !",bc_map,0xADD8E6;
+sleep2 1000;
+monster "safari",48,48,"Baú do Tesouro",1798,1,"Macaco#evt::OnBoxBreak";
+sleep2 1000;
+mapannounce "safari","[Homem das Selvas] O 5º e Último Round Começou !",bc_map,0xADD8E6;
+monster "safari",48,48,"Homem Macaco",1585,1;
+end;
+
+OnTimer600000:
+announce "[Homem das Selvas] O Evento Terminou, Parabéns aos Vencedores !",bc_all,0xADD8E6;
+sleep2 1000;
+mapwarp "safari","prontera",122,161;
+killmonsterall "safari",0;
+set $open,0;
+set Zeny, Zeny + $premio;
+stopnpctimer;
+end;
+
+}
+
+-	script	macaco-PCDieEvent	-1,{
+
+OnPCDieEvent:
+	getmapxy @map$,@x,@y,0;
+	sleep2 180000;
+	if ( @map$ == "safari" || @map$ == "bomber" ) {
+	set .@spoint$, getsavepoint(0);
+	set .@x, getsavepoint(1);
+	set .@y, getsavepoint(2);
+	warp .@spoint$, .@x, .@y;
+	end;
+		}
+			else { end; }
+}
+
+//Mapflags - Homem Macaco
+safari	mapflag	novending
+safari	mapflag	nowarp
+safari	mapflag	nochat
+safari	mapflag	noloot
+safari	mapflag	nodrop
+safari	mapflag	noskill
+safari	mapflag	noteleport
+safari	mapflag	noicewall
+safari	mapflag	nobranch
+safari	mapflag	nomemo
+safari	mapflag	nopenalty
+safari	mapflag	nosave	SavePoint
+safari	mapflag	nowarpto
