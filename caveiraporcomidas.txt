@@ -1,0 +1,55 @@
+prontera,164,174,2	script	Caveira por comida		408,{
+
+dispbottom "Volte Sempre";
+mes "[Caveira por Comidas]";
+mes "Bom Você deve estar se perguntando,''Oque esse cara está fazendo aqui'',";
+mes "Eu lhe digo, vim aqui a pedido de um Game master, para trazer um presente a voces";
+mes "Trocar Caveira por Comidas";
+mes "Ah, gostou ne?";
+next;
+mes "[Caveira por Comidas]";
+mes "Bom vamos ao que interessa";
+next;
+mes "[Caveira por Comidas]";
+mes "Os itens são esses:";
+mes "10 Caveira por 1 Comida de cada (+3) ";
+next;
+mes "[Caveira por Comidas]";
+mes "Deseja Trocar?";
+menu "Sim",Sim,"Não",Nao;
+next;
+
+
+Sim:
+next;
+mes "Deixe-me verificar se você possui os itens ...";
+next;
+if(countitem(7420)<1)goto l_semitem;
+mes "[Caveira por Comidas]";
+mes "Hmm, me parece que você tem os itens ...";
+mes "Você merece !";
+next;
+mes "Leve a recompensa com você !";
+additem 12058,50;
+additem 12048,50;
+additem 12053,50;
+additem 12063,50;
+additem 12068,50;
+close;
+
+l_semitem:
+mes "[Caveira por Comidas]";
+mes "Você nao possui todos os itens necessários!!";
+mes "Volte assim que consegui-los...";
+close;
+
+Nao:
+next;
+mes "[Caveira por Comidas]";
+mes "Você tem cara de quem é Fraco, Sera?";
+mes "Corra para o Pvp e mate varios Noobs";
+mes "Volte e Troque Suas Caveiras";
+close;
+dispbottom "Volte Sempre";
+}
+

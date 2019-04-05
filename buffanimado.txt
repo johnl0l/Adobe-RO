@@ -1,0 +1,102 @@
+//|==========================================================================================|
+//|   __________     __________       __________   _____          _____   _____        _____ |
+//|  |::::::::::|   |::::::::: |     |::::::::::|  \::::\        /::::/	  \::::\      /::::/ |
+//|  |:: ____ ::|   |:: ____ ::|     |:: ____ ::|   \::::\      /::::/	   \::::\    /::::/  |
+//|  |::|    |::|   |::|    |::|     |::|    |::|    \::::\    /::::/       \::::\  /::::/   |
+//|  |::|    |::|   |::|    |::|     |::|    |::|     \::::\  /::::/         \::::\/::::/    |
+//|  |::|____|::|   |::|____|::|     |::|    |::|      \::::\/::::/           \::::::::/     |
+//|  |::::::::::|   |::::::::::\     |::|    |::| 		\::::::::/             \::::::/	     |
+//|  |::________|   |:: ____ :::\    |::|    |::|		 \::::::/	  	     	\::::/	     |
+//|  |::|	   	    |::|     \:::|   |::|____|::|		 /::::::\               |::::|	     |
+//|  |::|           |::|      |::|   |::      ::|       /::::::::\              |::::|       |
+//|  |::|           |::|      |::|   |::::::::::|      /::::/\::::\             |::::|       |
+//|  |__|	   		|__|      |__|   |__________|     /____/  \____\	        |____|	     |
+//|        									   											     |
+//|==========================================================================================|
+//|   Script Criando por ragnaproxy | Cronus | Por Favor, Não Retire Os Créditos.            |
+//|==========================================================================================|
+//|      ************************ Buff Animado ****************************************      |
+//|==========================================================================================|
+
+prontera,161,176,4	script	Buff Animado	1062,{
+
+    	if(NO_P == 1){ mes "Espere 1 minuto para usar o buff animado novamente."; close;}
+    	if(NO_P == 0){
+	emotion 15; npctalk "Buff Animado";
+	enablenpc "Animado1"; enablenpc "Animado2"; enablenpc "Animado3"; enablenpc "Animado4"; enablenpc "Animado5"; enablenpc "Animado6";
+	donpcevent "Animado1::OnHabi"; donpcevent "Animado2::OnHabi"; donpcevent "Animado3::OnHabi"; donpcevent "Animado4::OnHabi"; donpcevent "Animado5::OnHabi"; donpcevent "Animado6::OnHabi";
+	percentheal 100,100;
+	skilleffect 33,0; sc_start SC_ANGELUS,360000,10; skilleffect 74,0; sc_start SC_MAGNIFICAT,360000,5; skilleffect 75,0; sc_start SC_GLORIA,360000,5; skilleffect 34,0; sc_start SC_BLESSING,360000,10; skilleffect 29,0; sc_start SC_INCREASEAGI,360000,10;
+    	skilleffect 66,0; sc_start SC_IMPOSITIO,360000,5; skilleffect 357,0; sc_start SC_CONCENTRATION,360000,5;
+    	addtimer 60000,"Buff Animado::OnAguarde";  set NO_P,1; end;
+	OnAguarde: set NO_P,0; end; OnPCLoginEvent: set NO_P,0; end; }      
+OnInit:
+disablenpc "Animado1"; disablenpc "Animado2"; disablenpc "Animado3"; disablenpc "Animado4"; disablenpc "Animado5"; disablenpc "Animado6"; end;
+
+}
+prontera,159,178,4	script	Animado1	1002,{
+end;
+OnHabi:
+	emotion 49; specialeffect rand(50,60); 
+		npcwalkto 158,176;
+			sleep 1000;               
+				npcwalkto 159,178;  
+					sleep 2000;
+						npcwalkto 158,176;                             
+							disablenpc "Animado1";   
+}
+prontera,158,176,4	script	Animado2	1002,{
+end;
+OnHabi:
+	emotion 50; specialeffect rand(50,60);
+		npcwalkto 159,174;
+			sleep 1000;
+				npcwalkto 158,176;		
+					sleep 2000;
+						npcwalkto 159,174;
+							disablenpc "Animado2";       
+}
+prontera,159,174,4	script	Animado3	1002,{
+end;
+OnHabi:
+	emotion 51; specialeffect rand(50,60);
+		npcwalkto 162,174;
+			sleep 1000;
+				npcwalkto 159,174;
+					sleep 2000;
+						npcwalkto 162,174;
+							disablenpc "Animado3";        
+}
+prontera,162,174,4	script	Animado4	1002,{
+end;
+OnHabi:
+	emotion 42;  specialeffect rand(50,60);
+		npcwalkto 164,176;
+			sleep 1000;
+				npcwalkto 162,174;
+					sleep 2000;
+						npcwalkto 164,176;
+							disablenpc "Animado4";       
+}
+prontera,164,176,4	script	Animado5	1002,{
+end;
+OnHabi:
+	emotion 38; specialeffect rand(50,60);
+		npcwalkto 162,178;
+			sleep 1000;
+				npcwalkto 164,176;	
+					sleep 2000;
+						npcwalkto 162,178;
+							disablenpc "Animado5";    
+}
+prontera,162,178,4	script	Animado6	1002,{
+end;
+OnHabi:
+	emotion 27; specialeffect rand(50,60);
+		npcwalkto 159,178;
+			sleep 1000;
+				npcwalkto 162,178;
+					sleep 2000;
+						npcwalkto 159,178;
+							disablenpc "Animado6";        
+}
