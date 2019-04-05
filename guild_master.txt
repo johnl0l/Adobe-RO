@@ -1,0 +1,93 @@
+sec_in02.gat,142,180,2	script	Guild Master	415,{
+set @npc$,"^4D4DFF[ Guild Master ]^000000";
+
+mes @npc$;
+mes "Olá ^FF7F00"+strcharinfo(0)+"^000000";
+mes "Deseja modificar o lider do seu clã?";
+next;
+switch(select("Sim:Não,obrigado"))
+{
+	case 1:
+	if( agitcheck() || agitcheck2() ){
+	mes @npc$; 
+	mes "Não converso com NINGUÉM durante a Emperium.";
+	close;}
+	if( !getcharid(2) ){
+	mes @npc$;
+	mes "Você precisa estar em uma clã primeiro.";
+	close;}
+	if( strcharinfo(0) != getguildmaster(getcharid(2)) ){
+	mes @npc$;
+	mes "Você ao menos tem que ser o lider de um clã, como tem coragem de tentar mudar algo que não te pertence?";
+	close;}
+	mes @npc$;
+	mes "Ok!!, MAS...";
+	mes "Tudo tem seu preço";
+	mes "Vou precisar de alguns itens.";
+	next;
+	mes @npc$;
+	mes "^7F00FFItens Necessários^000000";
+	mes "^4D4DFF10x^000000 "+getitemname(714);
+	mes "^4D4DFF2x^000000 "+getitemname(969);
+	mes "^FFCC002.000.000 Zeny^000000";
+	mes "Não achou que seria facil assim né?";
+	next;
+	mes @npc$;
+	mes "Ainda deseja continuar?";
+	next;
+	switch(select("Sim:Não,obrigado"))
+	{
+		case 1:
+		mes @npc$;
+		mes "Escreva o nome do novo lider";
+		mes "Com atenção, não tem como voltar atrás depois";
+		mes "^FF0000O membro tem que está ONLINE^000000";
+		input .@newgm$;
+		next;
+		mes @npc$;
+		mes "^FF0000O membro tem que está ONLINE^000000";
+		next;
+		mes @npc$;
+		mes "tem certeza?";
+		next;
+	switch(select("Sim:Não, Errei"))
+		{
+		case 1:
+		if(countitem(714) >= 10 && countitem(969) >= 2 && Zeny >= 2000000)
+			{
+			delitem 714,10;
+			delitem 969,2;
+			Zeny -= 2000000;
+			mes @npc$;
+			mes "Você fez a sua parte, agora é minha vez!";
+			next;
+			if( !guildchangegm( getcharid(2), .@newgm$ ) )
+			mes @npc$;
+			mes "Se você forneceu todos os dados corretos!";
+			mes "Você não está mais no comando!";
+			mes "^00CC00Relogue para ver a atualização^000000";
+			mes "Finalmente terminamos.";
+			close;
+			}
+		mes @npc$;
+		mes "Cade os itens que combinamos??.";
+		mes "Volte quando você tiver todos os itens!";
+		close; 	
+		
+		case 2:
+		mes @npc$;
+		mes "Oh Meu Deus como pode?...";
+		close;
+		}
+	case 2:
+	mes @npc$;
+	mes "Imaginei...";
+	close;
+	}
+
+case 2:
+mes @npc$;
+mes "Tudo bem.";
+close;
+}
+}
