@@ -1,0 +1,270 @@
+/*
+
+ rAthena Script
+ by :
+ Viole 
+ 
+ Duel Bet NPC [Modified]
+ 
+ Credits to the owner.
+ [ Whoever he is ]
+ 
+*/
+
+prontera,147,153,6	script	Duel Gambling	953,{
+
+	set @npcname$,"[Duel Manager]";
+	
+duelmenu:
+	mes @npcname$;
+	if(.gambling) {
+		mes "A duel is starting, please wait until the duel is over";
+		close;
+	}
+
+	mes callfunc("F_Hi") + " " + strcharinfo(0);
+	if(.char$ == strcharinfo(0) && .char2$ != "") {
+		mes "^0000FF" +.char2$+ "^000000 is waiting for you to start the duel!";
+		mes "Item Bet : ^0000FF"+$betitemidamt+"x " +getitemname($betitemid)+"^000000";
+		mes "What would you like to do?";
+		next;
+		if(select("Start Duel:Cancel Duel")==2)
+		{
+			announce "The duel was canceled by " +.char$,bc_map|bc_blue;
+			mes @npcname$;
+			mes "Very well, " + callfunc("F_Bye");
+			set dueling,0;
+			getitem $betitemid, $betitemidamt;
+			close2;
+			if((.char2$ != "") && (attachrid (getcharid(3,.char2$)))) {
+			attachrid getcharid(3,.char2$);
+			getitem $betitemid, $betitemidamt;
+			set dueling,0;
+			}
+			set .char$,"";
+			set .char2$,"";
+			set .gambling,0;
+			set .waiting,0;
+			end;
+		}
+		mes @npcname$;
+		mes "We will start the duel immediately.";
+		close2;
+		attachrid getcharid(3,.char2$);
+		warp "1@pvp",25,45;
+		attachrid getcharid(3,.char$);
+		set dueling,1;
+		warp "1@pvp",78,45;		
+		atcommand "@duel " + .char2$;
+		attachrid getcharid(3,.char2$);
+		atcommand "@accept";
+		set dueling,1;
+		set .gambling,1;		
+		announce "Duel between "+.char$+" and "+.char2$+" will start in 10 seconds!",bc_map|bc_blue;
+		sleep 1000;
+		mapannounce "1@pvp","You have 10 seconds to buff up!",1;
+		sleep 5000;
+		announce "5",bc_map|bc_blue;
+		sleep 1000;
+		announce "4",bc_map|bc_blue;
+		sleep 1000;
+		announce "3",bc_map|bc_blue;
+		sleep 1000;
+		announce "2",bc_map|bc_blue;
+		sleep 1000;
+		announce "1",bc_map|bc_blue;
+		sleep 1000;
+		announce "FIGHT!",bc_map|bc_blue;
+		end;
+	}
+	
+	if(.waiting) {
+		mes "The duel is gonna start soon!";
+		close;
+	}
+	
+	if(.char$ == strcharinfo(0)) {
+		mes "Please wait for your challenger.";
+		next;
+		if(select("Cancel Duel:I Will Wait!") == 1)
+		{
+			announce "The duel was canceled by " +.char$,bc_map|bc_blue;
+			mes @npcname$;
+			mes "So you've changed your mind!";
+			set dueling,0;
+			getitem $betitemid, $betitemidamt;
+			close2;
+			if((.char2$ != "") && (attachrid (getcharid(3,.char2$)))) {
+			attachrid getcharid(3,.char2$);
+			getitem $betitemid, $betitemidamt;
+			set dueling,0;
+			}
+			set .char$,"";
+			set .char2$,"";
+			set .gambling,0;
+			set .waiting,0;
+			end;
+		}
+		close;
+	}
+	
+	if(.char$ != "") {
+		mes "There is a player waiting for duel gambling";
+		mes "What would you like to do?";
+		mes " ";
+		mes "Challenger : ^0000FF"+.char$+"^000000";
+		mes "Item Bet : ^0000FF"+$betitemidamt+"x " +getitemname($betitemid)+"^000000";
+		mes " ";
+		mes "^FF0000Note: If you accept the challenge, the bet item will be removed from your inventory, unless the inviter cancels the duel.^000000";
+		next;
+		switch(select("Accept Duel Invitation From ^0000FF"+.char$+"^000000:What is Duel Gambling?"))
+		{
+		case 1:
+			delitem $betitemid, $betitemidamt;
+			set .char2$,strcharinfo(0);
+			set .waiting,1;
+			mes @npcname$;
+			mes "Please wait while I inform your opponent.";
+			announce ""+.char$+", "+.char2$+" accepts your challenge!!",bc_map|bc_blue;
+			close;
+		case 2:
+			mes @npcname$;
+			mes "I will allow 2 player to duel each other,";
+			mes "players have to duel with bets,";
+			next;
+			mes @npcname$;
+			mes "Gambling uses items.";
+			mes "The bet items are the prize you will get.";
+			next;
+			mes @npcname$;
+			mes "You only have 5 minutes to wait for an opponent or start the battle.";
+			next;
+			goto duelmenu;
+		}
+	}	
+
+	else {
+	noplayer:
+		mes "No player waiting for gambling currently";
+		mes "What would you like to do?";
+		next;
+		if(select("Start a duel:Duel Gambling?") == 2)
+		{
+			mes @npcname$;
+			mes "I will allow 2 player to duel each other,";
+			mes "players have to duel with bets,";
+			next;
+			mes @npcname$;
+			mes "Gambling uses items.";
+			mes "The bet items are the prize you will get.";
+			next;
+			mes @npcname$;
+			mes "You only have 5 minutes to wait for an opponent or start the battle.";
+			next;
+			goto noplayer;
+		}
+		mes @npcname$;
+		mes "What item would you like to bet for your duel?";
+		mes " ";
+		mes "^FF0000Note : Please input the item #, not the item name! (RMS)";
+		mes "Your challenger will have the same bet whatever you input!^000000";
+		input $betitemid;
+			if((countitem($betitemid) <= 0 ))
+			{
+				next;
+				mes @npcname$;
+				mes "You don't have this item in your inventory!";
+				goto duelmenu;
+			}
+		next;
+		mes @npcname$;
+		mes "How many "+getitemname($betitemid)+" will it be for the duel bet?";
+		input $betitemidamt;
+			if((countitem($betitemid) < $betitemidamt ))
+			{
+				next;
+				mes @npcname$;
+				mes "You don't have enough "+getitemname($betitemid)+"(s) in your inventory!";
+				goto duelmenu;
+			}
+			if($betitemidamt <= 0)
+			{
+				next;
+				mes @npcname$;
+				mes "Please input a # greater than 0!";
+				next;
+				goto duelmenu;
+			}
+		delitem $betitemid, $betitemidamt;
+		Initnpctimer;
+		set .char$,strcharinfo(0);
+		next;
+		mes @npcname$;
+		mes "Please wait for your oppenent.";
+		announce .char$+ " is waiting for a duel! Bet : "+$betitemidamt+"x "+getitemname($betitemid)+"",bc_map|bc_blue;
+		close;
+		}
+
+OnTimer300000:
+	announce "Duel started by "+.char$+". Waiting time is over! Please register again!",bc_map|bc_blue;
+	if((.char$ != "") && (attachrid (getcharid(3,.char$)))) {
+	getitem $betitemid, $betitemidamt;
+	set dueling,0;
+	}
+	if((.char2$ != "") && (attachrid (getcharid(3,.char2$)))) {
+	getitem $betitemid, $betitemidamt;
+	set dueling,0;
+	}
+
+	set .char$,"";
+	set .char2$,"";
+	set .gambling,0;
+	set .waiting,0;
+	stopnpctimer;
+	end;
+
+OnPCKillEvent:
+	if(!dueling) end;
+	getitem $betitemid, $betitemidamt*2;
+	atcommand "@leave";
+	announce strcharinfo(0)+" has won the duel! Earned "+$betitemidamt*2+"x "+getitemname($betitemid)+"",bc_map|bc_blue;
+	set dueling,0;
+	attachrid killedrid;
+	set dueling,0;
+	set .char$,"";
+	set .char2$,"";
+	set .gambling,0;
+	set .waiting,0;
+	sleep 3000;
+	mapwarp "1@pvp","prontera",154,198;
+	end;
+
+OnPCDieEvent:
+	if(!dueling) end;
+	if (killerrid == 0)
+	{
+	announce "The duel has been canceled because "+strcharinfo(0)+" used @die!", bc_map|bc_blue;
+	if (strcharinfo(0) == .char$)
+	{
+	attachrid getcharid(3,.char2$);
+	getitem $betitemid, $betitemidamt;
+	}
+	if (strcharinfo(0) == .char2$)
+	{
+	attachrid getcharid(3,.char$);
+	getitem $betitemid, $betitemidamt;
+	}
+	atcommand "@leave";
+	set dueling,0;
+
+	set .char$,"";
+	set .char2$,"";
+	set .gambling,0;
+	set .waiting,0;
+	set .waiting,0;
+	sleep 3000;
+	mapwarp "1@pvp","splendide",157,198;
+	end;
+}
+}
+1@pvp	mapflag	pvp

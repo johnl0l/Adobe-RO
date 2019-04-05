@@ -1,0 +1,286 @@
+// Comment if you already have this function
+function	script	int__	{
+   set .@num, getarg(0);
+   set .@numString$, getarg(0);
+   if ( .@num == 0 || .@num >= 2147483647 ) return getarg(0);
+   set .@l, getstrlen(.@numString$);
+   for ( set .@i,0; .@i < .@l; set .@i, .@i + 1 ) {
+       set .@num$, .@num % pow(10,.@i+1) / pow(10,.@i) + .@num$;
+       if ( (.@i+1) % 3 == 0 && .@i+1 != .@l ) set .@num$, ","+ .@num$;
+   }
+   return .@num$;
+}
+
+prontera,147,153,6	script	Duel Gambling	953,{
+set .@npcname$,"[ Duel Manager ]";
+L_mm:
+mes .@npcname$;
+
+// If Duel cancel and player was not online.
+//-----------------------------------------
+if( dueling && .char$ != strcharinfo(0) && .char2$ != strcharinfo(0) ) {
+	set Zeny, Zeny + dueling;
+	dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+	set dueling, 0;
+}
+
+//If already a duel is going on
+if( .gambling ) {
+	mes "A duel is starting, please wait until the duel is over.";
+	close;
+}
+
+mes callfunc("F_Hi") +" "+ strcharinfo(0) +".";
+//If the challenger and the one accepting the duel have registred and the duel is ready to start
+if( .char$ == strcharinfo(0) && .char2$ != "" ) {
+	mes "^0000FF"+ .char2$ +"^000000 is waiting for you to start the duel!";
+	if( .zeny )
+		mes "Dueling for total ^FF0000"+ callfunc( "int__", .zeny ) +"^000000 zeny.";
+	mes "What would you like to do ?";
+	next;
+	menu "~ ^777777Start Duel.^000000",L_sduel,"~ ^777777Cancel Duel.^000000",L_cduel;
+}
+
+//If the one accept the duel is going to talk to the npc
+if( .waiting ) {
+	mes "The duel gonna start soon !";
+	close;
+}
+
+//If the challenger has registred, speaks again to the npc and no one accepted it
+if( .char$ == strcharinfo(0) ) {
+	mes "Please wait for your challenger.";
+	next;
+	menu "~ ^777777Cancel Duel.^000000",L_cduel,"~ ^777777I will wait.^000000",-;
+	close;
+}
+//If a challenger has registred, another person speaks to the npc and no one has accepted before
+if( .char$ != "" ) {
+	mes "There is a player is waiting for gambling.";
+	mes "What would you like to do ?";
+	next;
+	menu "~ ^777777Player and Gamble Information.^000000",-,"~ ^777777Send Duel invitation to the player.^000000",L_iduel,"~ ^777777Duel Gambling ?^000000",L_info;
+	mes .@npcname$;
+	mes "The player that challenge is named ^0000FF"+ .char$ +"^000000";
+	if( .zeny )
+		mes "The player duel for ^FF0000"+ callfunc( "int__", .zeny ) +"^000000 zeny.";
+	next;
+	goto L_mm;
+}
+//If no challenger is registred.
+else {
+	mes "No one is waiting for gamble currently.";
+	mes "What would you like to do ?";
+	next;
+
+	menu "~ ^777777Start a duel.^000000",-,"~ ^777777Duel Gambling ?^000000",L_info;
+	set .zeny, callsub( L_PDZeny, 0, .@npcname$ );
+	initnpctimer;
+	set .char$, strcharinfo(0);
+	mes .@npcname$;
+	mes "Please wait for your opponent.";
+	announce "[ "+ .char$ +" ] bet "+ callfunc( "int__", dueling ) +" Zeny that no one could kill him ! He is waiting for an opponent !",bc_map|bc_blue;
+	close;
+}
+
+//This party will run after someone accepted the challenge of a challenger
+L_iduel:
+if( .char2$ != "" || .char$ == "" ) {
+	mes "Sorry you are too slow.";
+	close;
+}
+set .zeny, callsub( L_PDZeny, .zeny, .@npcname$ );
+set .char2$, strcharinfo(0);
+set .waiting, 1;
+
+mes .@npcname$;
+mes "Please wait while I inform your opponent.";
+announce "[ "+ .char$ +" ] your challenger is [ "+ .char2$ +" ] !",bc_map|bc_blue;
+close;
+
+//After both players registred and the challenger starts the duel.
+L_sduel:
+if( .char2$ == "" ) {
+	mes "Sorry the duel is cancelled.";
+	close;
+}
+mes .@npcname$;
+mes "We will start the duel immediately.";
+close2;
+
+if( !isloggedin( getcharid( 3,.char2$ ),getcharid( 0,.char2$ ) ) ) {
+	dispbottom "Sorry, "+ .char2$ +" is not online.";
+	end;
+}
+percentheal 100, 100;
+attachrid( getcharid( 3,.char2$ ) );
+warp "1@pvp",25,45;
+percentheal 100, 100;
+
+attachrid( getcharid( 3,.char$ ) );
+warp "1@pvp",78,45;
+atcommand "@duel "+ .char2$;
+
+attachrid( getcharid( 3,.char2$ ) );
+atcommand "@accept";
+set .gambling, 1;
+announce "[ "+ .char$ +" ] start a duel with [ "+ .char2$ +" ] !",bc_map|bc_blue;
+end;
+
+//If only the challenger is registred and cancels or if both registred and the challenger cancels the duel.
+L_cduel:
+if( .char$ != strcharinfo(0) ) {
+	mes "Sorry the duel is already cancelled.";
+	close;
+}
+announce "The duel was canceled by [ "+ .char$ +" ].",bc_map|bc_blue;
+mes .@npcname$;
+mes "Very well, "+ callfunc("F_Bye");
+set Zeny, Zeny + dueling;
+dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+set dueling, 0;
+close2;
+if( .char2$ != "" && isloggedin( getcharid( 3,.char2$ ),getcharid( 0,.char2$ ) ) ) {
+	attachrid( getcharid( 3,.char2$ ) );
+	set Zeny, Zeny + dueling;
+	dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+	set dueling, 0;
+}
+
+L_resetvar:
+set .char$, "";
+set .char2$, "";
+set .gambling, 0;
+set .waiting, 0;
+set .zeny, 0;
+stopnpctimer;
+end;
+
+//If you click on information for the duel.
+L_info:
+mes .@npcname$;
+mes "I will allow 2 players to duel each other,";
+mes "players have to duel with gambling.";
+next;
+mes .@npcname$;
+mes "The gamble zeny must be same amount as opponent gamble.";
+next;
+mes .@npcname$;
+mes "Maximum time for waiting duel and dueling is 5 minutes.";
+next;
+goto L_mm;
+
+//If 5 Minutes passed after the challenger registred and no one accepts it.
+OnTimer300000:
+announce "No challenger or the time is over, the duel was canceled.",bc_blue|bc_npc;
+if( .char$ != "" && isloggedin( getcharid( 3,.char$ ),getcharid( 0,.char$ ) ) ) {
+	attachrid( getcharid( 3,.char$ ) );
+	set Zeny, Zeny + dueling;
+	dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+	set dueling, 0;
+}
+if( .char2$ != "" && isloggedin( getcharid( 3,.char2$ ),getcharid( 0,.char2$ ) ) ) {
+	attachrid( getcharid( 3,.char2$ ) );
+	set Zeny, Zeny + dueling;
+	dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+	set dueling, 0;
+}
+goto L_resetvar;
+
+//When a player kills his opponent.
+OnPCKillEvent:
+if( !dueling || ( dueling && strcharinfo(0) != .char$ && strcharinfo(0) != .char2$ ) ) end;
+
+set Zeny, Zeny + dueling * 2;
+dispbottom "You win "+ callfunc( "int__", dueling * 2 ) +" Zeny !";
+set dueling, 0;
+atcommand "@leave";
+announce "[ "+ strcharinfo(0)+ " ] win the duel!",bc_map|bc_blue;
+mapwarp "1@pvp","prontera",157,198;
+
+attachrid killedrid;
+set dueling, 0;
+goto L_resetvar;
+
+
+//When a player dies.. (Just incase he doesnt get killed by his oppenent)
+OnPCDieEvent:
+if( !dueling || ( dueling && strcharinfo(0) != .char$ && strcharinfo(0) != .char2$ ) ) end;
+if( !killerrid ) {
+	announce "The duel has been cancelled because "+ strcharinfo(0) +" died.", bc_map|bc_blue;
+	set dueling, 0;
+	atcommand "@leave";
+	if( strcharinfo(0) == .char$ && isloggedin( getcharid( 3,.char2$ ),getcharid( 0,.char2$ ) ) ) {
+		attachrid( getcharid( 3,.char2$ ) );
+		set Zeny, Zeny + dueling;
+		dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+		mapwarp "1@pvp","prontera",154,198;
+		set dueling, 0;
+	}
+	else if( strcharinfo(0) == .char2$ && isloggedin( getcharid( 3,.char$ ),getcharid( 0,.char$ ) ) ) {
+		attachrid( getcharid( 3,.char$ ) );
+		set Zeny, Zeny + dueling;
+		dispbottom "You collected you previous gamble : "+ callfunc( "int__", dueling ) +" Zeny.";
+		mapwarp "1@pvp","prontera",154,198;
+		set dueling, 0;
+	}
+	goto L_resetvar;
+}
+end;
+
+// Label for gambling Zeny
+// -----------------------------
+
+L_PDZeny:
+set .@npcname$, getarg(1);
+if( !getarg(0) ) {
+	mes .@npcname$;
+	mes "How many zeny you would like to bet ?";
+	next;
+	if( input( .@zeny, 1, Zeny ) != 0 ) {
+		mes .@npcname$;
+		mes "You don't have enough zeny to duel! I won't allow that!";
+		close;
+	}
+	if( .char$ != "" ) {
+		mes .@npcname$;
+		mes "Sorry you were too slow. Someone already bet.";
+		close;
+	}
+	set Zeny, Zeny - .@zeny;
+	set dueling, .@zeny;
+}
+else {
+	if( getarg(0) > Zeny ) {
+		mes .@npcname$;
+		mes "You don't have enough zeny to duel! I won't allow that!";
+		close;
+	}
+	else {
+		if( .char2$ != "" || .char$ == "" ) {
+			mes .@npcname$;
+			mes "Sorry you were too slow."+ ( .char2$ != "" ? " Someone already bet." : "" );
+			close;
+		}
+		set Zeny, Zeny - getarg(0);
+		set dueling, getarg(0);
+		set .@zeny, getarg(0) * 2;
+	}
+}
+return .@zeny;
+}
+
+1@pvp	mapflag	noreturn
+1@pvp	mapflag	noteleport
+1@pvp	mapflag	nowarp
+1@pvp	mapflag	nowarpto
+1@pvp	mapflag	nogo
+1@pvp	mapflag	nosave
+1@pvp	mapflag	nomemo
+1@pvp	mapflag	notrade
+1@pvp	mapflag	nodrop
+1@pvp	mapflag	nochat
+1@pvp	mapflag	novending
+1@pvp	mapflag	nobranch
+1@pvp	mapflag	pvp
+1@pvp	mapflag	clouds

@@ -1,0 +1,46 @@
+sec_in02.gat,156,181,2	script	Disquise	89,{
+
+	mes "[Disquise]";
+	mes "O que deseja?";
+	switch(select("- Transforma-se:- Voltar ao Normal:- Nada")){ 
+	
+		case 1:
+		
+			next;
+			mes "[Disquise]";
+			mes "Digite o id do monstro que deseja ser transformado.";
+			input @idmonster;
+			next;
+			mes "[Disquise]";
+			mes "Deseja ser transformado em um: " +getmonsterinfo(@idmonster,0)+" ?";
+			next;
+			
+			if(select("Sim:Não") == 2) close;	
+			
+				mes "[Disquise]";
+				mes "Você foi transformado!";
+				disguise @idmonster;
+				close;		
+		
+		case 2:
+		
+			next;
+			mes "[Disguise]";
+			mes "Deseja voltar ao normal ?";
+			
+			if(select("Sim:Não") == 2) close;
+			
+				next;
+				mes "[Disguise]";
+				mes "Você voltou ao normal.";
+				undisguise;
+				close;
+	
+		case 3:
+		
+			next;
+			mes "[Disguise]";
+			mes "Volte quando precisar dos meus serviços.";
+			close;
+	}
+}

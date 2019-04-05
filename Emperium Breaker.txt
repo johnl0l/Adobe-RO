@@ -1,0 +1,158 @@
+//  _______________________________________________________
+// /													   \
+// |	   _		   _   _   _							|
+// |	  | |__  _ __ / \ | |_| |__   ___ _ __   __ _	   	|
+// |	  | '_ \| '__/ _ \| __| '_ \ / _ \ '_ \ / _` |	  	|
+// |	  | |_) | | / ___ \ |_| | | |  __/ | | | (_| |	  	|
+// |	  |_.__/|_|/_/   \_\__|_| |_|\___|_| |_|\__,_|	 	|
+// |														|
+// |				 brAthena Script						|
+// |--------------------------------------------------------|
+// | Nome do Script: Emperium Breaker						|
+// |--------------------------------------------------------|
+// | Criado por: Emistry									|									
+// |--------------------------------------------------------|
+// | Versões rA/brA: 2.0/2.1								|
+// |--------------------------------------------------------|
+// | Descrição:												|
+// | Este script proporcionar aos jogadores um lugar para 	|
+// | testar o quão rápido pode um jogador quebra o Emperium.|
+// | Tempo quebrando Emperium também é registrado para que 	|
+// | os jogadores possam comparar / mostrar a cada um dos 	|
+// | outros.												|	
+// |														|
+// |--------------------------------------------------------|
+// | Changelog:			   									|
+// |[1.0] - Uma Sala de permitir aos jogadores para 		|
+// | 		determinar sua velocidade Quebra Emperium.		|
+// |[2.0] - Display escada fixa incorreta.					|
+// |[2.1] - Traduzido para brAthena [hail]					|
+// \_______________________________________________________/
+prontera,155,181,5	script	Emperium Breaker	1288,{
+
+// O Mapa que será usado
+set .Map$,"job3_arch01";
+// Quantos breaker top serão gravado
+set .TopRank,5;
+// Mensagem para informar os jogadores quando estão dentro da sala
+setarray .Instruction$[0],
+		"Por favor, ouça com atenção.",
+		"Esta é a sala de teste Emperium Breaker, que é usado para testar o seu tempo mínimo para quebrar o Emperium.",
+		"Prepare-se ... e faça o seu melhor para quebrá-lo ...",
+		"Tudo bem isso é tudo que eu quero dizer, prepare-se, vai começar em breve.";
+			
+			
+while( 1 ){
+mes "Esta é a sala de testes Emperium Breaker.";
+mes "Nesta sala você é capaz de calcular a velocidade de quebrar o Emperium.";
+next;
+switch( select( ( getmapusers( .Map$ ) )?"^FF0000Não disponível":"^0000FFDisponível^000000",
+				"Top ^FF0000"+.TopRank+"^000000 Breaker Líder",
+				( getgmlevel() < 90 )?"":"^FF0000[GM]^000000 Redefinir quarto",
+				( getgmlevel() < 90 )?"":"^FF0000[GM]^000000 Redefinir Líder" )){
+Case 1:
+	if( getmapusers( .Map$ ) ){
+		mes "Nesse momento há um outro jogador na sala.";
+		next;
+		break;
+		}
+	warp .Map$,0,0;
+	killmonster .Map$,"All";
+//	removemapflag .Map$,mf_noskill;
+	donpcevent strnpcinfo(0)+"::OnReady";
+	end;
+Case 2:
+	mes "^ED1ADCÚltimo Recorde^000000 : "+LatestRecord/1000+"."+LatestRecord%1000+" segundos.";
+	for( set .@i,0; .@i < .TopRank; set .@i,.@i + 1 ){
+		if( !$TopRankTime[.@i] ) break;
+		mes "^FF0000Top "+( .@i + 1 )+" : ^0000FF"+$TopName$[.@i]+" ";
+		mes "^FF0000Tempo gasto : ^ED1ADC[ "+$TopRankTime[.@i]/1000+"."+$TopRankTime[.@i]%1000+" Sec. ]^000000 ";
+	}
+	next;
+	break;
+
+Case 3:
+	mapannounce .Map$,"O GM reiniciou a sala de testes para Breakers.",0,0x00FF00;
+	killmonster .Map$,"All";
+	sleep2 3000;
+	mapwarp .Map$,"prontera",155,171;
+	mes "Resetado. O Jogador que está dentro da sala, será teleportado para fora.";
+	next;
+	break;
+Case 4:	
+	switch( select( "^0000FFTodos os Jogadores^000000:^FF0000Um Jogador^000000" ) ){
+		Case 1:
+			deletearray $TopRankTime[0],getarraysize( $TopRankTime );
+			deletearray $TopName$[0],getarraysize( $TopName$ );
+			mes "Todo o Rank foi resetado.";
+			break;
+		Case 2:
+			mes "Por favor coloque o ^FF0000NOME EXATO^000000 do jogador que você deseja excluir.";
+			input .Name$;
+			for( set .@i,0; .@i < .TopRank; set .@i,.@i + 1 ){
+				if( .Name$ == $TopName$[.@i] ){
+					deletearray $TopName$[.@i],1;
+					deletearray $TopRankTime[.@i],1;
+					mes "Removido o jogador ^FF0000"+.Name$+"^000000 do Rank.";
+				}
+			}
+		}
+	next;
+	break;
+	}
+}
+
+OnReady:
+sleep2 3000;
+for( set .@i,0; .@i < getarraysize( .Instruction$ ); set .@i,.@i + 1 ){
+	mapannounce .Map$,.Instruction$[.@i],0,0x00FF00;
+	sleep2 2500;
+	}
+for( set .@i,5; .@i > 0; set .@i,.@i - 1 ){
+	mapannounce .Map$,"Contagem regressiva : "+.@i+" Segundos.",0,0x00FF00;
+	sleep2 1000;
+	}
+//mapannounce .Map$,"Agora destrua o Emperium. Habilidades desativada.",0,0x00FF00;
+setmapflag .Map$,mf_noskill;
+monster .Map$,29,27,"Breaker Teste",1288,1,strnpcinfo(0)+"::OnBreaked";
+set .Record,0;
+sleep2 500;
+initnpctimer;
+end;
+
+OnTimer600000:
+if( !mobcount( .Map$,strnpcinfo(0)+"::OnBreaked" ) ) end;
+	mapannounce .Map$,"Você passou muito tempo sem bater no Emperium. Acho que você está AFK, então você está fora.",0,0xED1ADC;
+	sleep2 3000;
+	mapwarp .Map$,"prontera",155,179;
+	stopnpctimer;
+end;
+
+OnBreaked:
+	set .Time,getnpctimer(0);
+	copyarray .@tempName$[0],$TopName$[0],getarraysize( $TopName$ );
+	copyarray .@tempRecord[0],$TopRankTime[0],getarraysize( $TopRankTime[0] );
+	set LatestRecord,.Time;
+	for( set .@i,0; .@i < .TopRank; set .@i,.@i + 1 ){
+		if( .Time < $TopRankTime[.@i] || !$TopRankTime[.@i] ){
+				set $TopRankTime[.@i],.Time;
+				set $TopName$[.@i],strcharinfo(0);
+				copyarray $TopRankTime[.@i + 1],.@tempRecord[0],getarraysize( .@tempRecord );
+				copyarray $TopName$[.@i + 1],.@tempName$[0],getarraysize( .@tempName$ );
+			announce "[ "+strcharinfo(0)+" ] Top alcançado "+( .@i + 1 )+" Emperium destruído em "+.Time/1000+"."+.Time%1000+" Segundos !!!",bc_all,0xED1ADC;
+			break;
+			}
+		}
+	stopnpctimer;
+	announce "Tempo levado : "+.Time/1000+"."+.Time%1000+" Segundos. ",bc_self,0xED1ADC;
+//	removemapflag .Map$,mf_noskill;
+	sleep2 5000;
+	mapwarp .Map$,"prontera",155,179;
+	end;
+}
+	
+job3_arch01	mapflag	nocommand	50
+job3_arch01	mapflag	gvg	on
+job3_arch01	mapflag	gvg_castle
+job3_arch01	mapflag	monster_noteleport
+job3_arch01	mapflag	nosave	SavePoint
