@@ -1,0 +1,284 @@
+//====================================================================================//
+//--- Created by GmOcean -------------------------------------------------------------//
+//-- You may modify this script at your own risk. However any modifications to this
+//-- script are made at your own discretion and I will not provide any support to  
+//-- modified scripts. You are also forbidden to release the modifed script as your
+//-- own. You can however post suggestions and I will take them into consideration.
+//-- You may also post the modified script up in the Script Support section, as long
+//-- as I am given Credit as the Original script creator. Thank you for following 
+//-- these few requests. Enjoy the script ~!
+//-------------------------------------------------- Script Version = 1.0 ------------//
+//====================================================================================//
+
+//------------------------------------------------------------------------------------//
+// -- Juggernaght Buff Configuration
+//------------------------------------------------------------------------------------//
+-	script	jugbuffconf	-1,{
+OnInit:
+set $@juggmap$,"map_name here";
+setarray $@juggbuffids[0],21,29,30,32,35,40,41,44,45,46,49,60,77,110,115,184;
+setarray $@juggbufflvl[0],20,20,20,20,10,10,10,10,10,10,10, 0,10, 10, 20, 10;
+end;}
+//------------------------------------------------------------------------------------//
+//-- Warp portal
+//------------------------------------------------------------------------------------//
+
+prontera,156,148,4	script	Juggwarp	45,2,2,{
+OnTouch: warp $@juggmap$,30,25; doevent "JuggController::OnPlayerEnter"; end;
+OnEventStart: sleep 60000; set .loop,.loop+1; if(.loop>=3){donpcevent "JuggController::OnBegin"; donpcevent "Juggernaght Event::OnInit"; announce "The Juggernaght Event has begun!!",bc_blue|bc_all; end;} announce "The Juggernaght Event will begin in "+(3 - .loop)+" minutes. Please enter the portal located in Prontera.",bc_blue|bc_all; goto OnEventStart; end;}
+
+//------------------------------------------------------------------------------------//
+//-- Actual Script
+//------------------------------------------------------------------------------------//
+prontera,158,155,4	script	Juggernaght Event	459,{//849
+set .@npcname$,"[^0000FF Juggernaght NPC ^000000]";
+set .@GMLevel,60;
+if( getgmlevel() >= .@GMLevel){goto iGM;}
+if(.event){end;}
+
+mes .@npcname$;
+mes "Welcome, how may I be of assistance?";
+menu "Information",iInfo,"Nothing, just passing through.",iNothing;
+iInfo:
+next;
+mes .@npcname$;
+mes "Please choose an option to learn about.";
+menu "Basic Information",ibasicinfo,"Juggernaught Information",ijuginfo,"Normal Player Information",inorminfo;
+  ibasicinfo:
+  next;
+  mes .@npcname$;
+  mes "The Basic objective of this event, is to become the Juggernaught, and kill as many people as possible.";
+  mes "And also to survive as long as possible, when your not the Juggernaught.";
+  close;
+  ijuginfo:
+  next;
+  mes .@npcname$;
+  mes "The Juggernaught's goal is simple. Kill as many people as possible.";
+  mes "To become the Juggernaught, one must first kill 5people without dying.";
+  mes "If no one can do that in the first 5minutes of the event, a Juggernaught will be chosen at random.";
+  next;
+  mes "Afterwards, the Juggernaught, will switch randomly to another person every 3minutes, or when the Juggernaught is killed.";
+  mes "For every kill the Juggernaught obtains, he/she will gain "+$pamt+" "+getitemname($pitem)+"";
+  close;
+  inorminfo:
+  next;
+  mes .@npcname$;
+  mes "A Normal player's goal is simple. Kill or be killed.";
+  mes "As a normal player, you want to kill or help kill the current Juggernaught.";
+  mes "If you kill the Juggernaught, you will then take its place, then everyone will be after your life.";
+  mes "Lastly, for every 1minute you stay alive, you'll obtain "+$pamt+" "+getitemname($pitem)+"";
+  mes "However, if you die before that minute is up, it will reset the counter, and it'll be as if, you've been alive for 0seconds.";
+  close;
+iNothing:
+close;
+iGM:
+mes .@npcname$;
+mes "Please select an Option to modify.";
+menu "Turn ON/OFF Event",iEvent,"Event Settings",iSettings;
+iEvent:
+next;
+mes .@npcname$;
+if($jevent){mes "The Event is currently: [^0000FF ON ^000000]"; mes "Would you like to turn it OFF?";}
+if(!$jevent){mes "The Event is currently: [^0000FF OFF ^000000]"; mes "Would you like to turn it ON?";}
+menu "Yes",iYes,"No",iNothing;
+  iYes:
+  if($jevent){set $jevent,0; announce "A GM has decided to turn the Juggernaght Event OFF. As a result no further prizes will be given.",bc_blue|bc_all; goto iStop;}
+  set $jevent,1; announce "The Juggernaght Event will begin in 3 minutes. Please enter the portal located in Prontera.",bc_blue|bc_all;
+  goto iStart;
+  end;
+  iSettings:
+  next;
+  mes .@npcname$;
+  mes "Please select a setting to modify.";
+  menu "Time limit",iLimit,"Prize Settings",iPrize;
+    iLimit:
+	next;
+	mes .@npcname$;
+	mes "Please input the time limit for the event.";
+	mes "Current Time limit is: "+$timelimit+"";
+	mes "Time is in minutes.";
+	input .@limit;
+	if(.@limit<=9){next; mes "You cannot have an event that lasts for less than 10 minutes."; close;}
+	set $timelimit,.@limit;
+	next;
+	mes "Time Limit successfullly changed.";
+	close;
+	iPrize:
+	next;
+	mes .@npcname$;
+	mes "Please input the item to be obtained.";
+	mes "Current Item is:";
+	mes "[^0000FF "+getitemname($pitem)+" ^000000] x[^0000FF "+$pamt+" ^000000] | ItemID - ^0000FF"+$pitem+"^000000";
+	input .@item;
+	if( getitemname(.@item)=="" || getitemname(.@item)=="null")
+	  {next; mes "That item does not exist. Please try again."; close;}
+	next;
+	mes .@npcname$;
+	mes "Please input the amount of the item to be obtained.";
+	mes "10 = Minimum  |  10,000 = Maximum";
+	input .@amt;
+	if( .@amt<1 || .@amt>10000){next; mes "That amount is invalid. Using default amount of 1"; set $pitem,.@item; set $pamt,1; close;}
+	set $pitem,.@item; set $pamt,.@amt;
+	next;
+	mes .@npcname$;
+	mes "The Prize has been changed successfully.";
+	mes "Prize: [^0000FF "+getitemname($pitem)+" ^000000] x[^0000FF "+$pamt+" ^000000]";
+	close;
+  iStop:
+  mapwarp $@juggmap$,"prontera",157,187; sleep2 1; disablenpc "Juggwarp"; 
+  donpcevent "JuggController::OnEnd"; close;
+  iStart:
+  enablenpc "Juggwarp"; donpcevent "Juggernaght Event::OnTime"; donpcevent "Juggwarp::OnEventStart"; close;
+OnTime:
+sleep (($timelimit*60000)+180000); //Sleeps for the entire duration of the event +3mins
+mapwarp "mapname","prontera",157,187; sleep 1; disablenpc "Juggwarp";
+donpcevent "JuggController::OnEnd"; set $jevent,0; end;
+OnInit:
+set $jevent,0;
+disablenpc "Juggwarp";
+end;
+}
+//----------------------------------------------------------------------------------//
+//-- Event Controller
+//----------------------------------------------------------------------------------//
+-	script	JuggController	111,{
+end;
+//OnInit:
+//end;
+
+OnTimer1000:
+if(!$jevent){end;} //dispbottom "The Event has ended.";  <-- Add this before end, for debugging.
+if(!.Jstart){initnpctimer; end;} //dispbottom "Event has not started yet.";  <-- Add this before end, for debugging.
+if(!.Juggernaght){initnpctimer; end;} //dispbottom "No Juggernaght has been chosen yet.";  <-- Add this before end, for debugging.
+set @life,@life+1;
+if(@life>=60)
+  {if(strcharinfo(3) != "mapname"){initnpctimer; end;}
+   getitem $pitem,$pamt; set @life,0;}
+initnpctimer;
+//dispbottom "You need: "+(60 - @life)+" more seconds"; 
+end;
+OnPlayerEnter:
+set @kills,0; set @jkills,0; set @life,0;
+for(set .@i,0; .@i<getarraysize(.Eventlist); set .@i,.@i+1)
+  {if( .Eventlist[.@i] == getcharid(3) ){end;}}
+set .Eventlist[.@i+1],getcharid(3);
+
+attachnpctimer(strcharinfo(0));
+initnpctimer;
+end;
+OnEnd:
+atcommand "@pvpoff";
+removemapflag $@juggmap$,mf_pvp;
+deletearray .Eventlist[0],128;
+set .Juggernaght,0;
+set .Jstart,0;
+end;
+OnBegin:
+atcommand "@pvpon";
+setmapflag $@juggmap$,mf_pvp;
+set .Jstart,1;
+//Continues to NoJugg lable (No need for a goto here).
+NoJugg:
+if(!$jevent){end;}
+if(!.Juggernaght)//Checks to see if a Juggernaght has been created/chosen.
+  {sleep 300000; //5min wait
+    if(!.Juggernaght) //Checks again, after 5mins are up.
+	  {goto iJuggPick;}}
+end; //Means Juggernaght is already chosen?
+
+iJuggPick:
+if(!$jevent){end;}
+set .@i,rand(getarraysize(.Eventlist));
+if(isloggedin(.Eventlist[.@i]))
+  {attachrid(.Eventlist[.@i]);
+    if(strcharinfo(3) != $@juggmap$){detachrid; goto iJuggPick;}
+	set .Juggernaght,.Eventlist[.@i];
+	announce "The New Juggernaght is: "+strcharinfo(0)+" !",bc_blue|bc_map;
+	atcommand "@size 2";
+			for(set .@j,0; .@j<getarraysize($@juggbuffids); set .@j,.@j+1)
+	  {sc_start $@juggbuffids[.@j],300000,$@juggbufflvl[.@j];} }
+goto iNewJugg;
+end;
+
+iNewJugg:
+if(!$jevent){end;}
+sleep 1000;
+set .loop,.loop+1;
+if(.loop>=180) //180 = 3mins
+  {goto iNewJuggPick;}
+goto iNewJugg;
+end;
+
+iNewJuggPick:
+if(!$jevent){end;}
+set .@i,rand(getarraysize(.Eventlist));
+if(isloggedin(.Eventlist[.@i]))
+  {attachrid(.Eventlist[.@i]);
+    if(strcharinfo(3) != $@juggmap$){detachrid; goto iNewJuggPick;}
+	if(.Juggernaght==getcharid(3)){detachrid; goto iNewJuggPick;}
+	set .Juggernaght1,.Eventlist[.@i];
+	attachrid(.Juggernaght);
+	atcommand "@size 3";
+	for(set .@j,0; .@j<getarraysize($@juggbuffids); set .@j,.@j+1)
+	  {sc_end $@juggbuffids[.@j];}
+	attachrid(.Juggernaght1);
+	set .Juggernaght,.Juggernaght1;
+	set .Juggernaght1,0;
+	announce "The New Juggernaght is: "+strcharinfo(0)+" !",bc_blue|bc_map;
+	atcommand "@size 2";
+	for(set .@i,0; .@i<getarraysize($@juggbuffids); set .@i,.@i+1)
+	  {sc_start $@juggbuffids[.@i],300000,$@juggbufflvl[.@i];} 
+	detachrid;}
+goto iNewJugg;
+end;
+
+OnPCKillEvent:
+if(strcharinfo(3) != $@juggmap$){end;}
+if(!.Juggernaght)
+  {if(killedrid == getcharid(3) && killerrid == getcharid(3)){dispbottom "You killed yourself."; set @kills,0; end;}
+   attachrid killedrid; set @kills,0; atcommand "@alive"; sleep2 1; warp strcharinfo(3),0,0;
+   attachrid killerrid; set @kills,@kills+1; 
+   if(@kills>=5)
+     {set @kills,0; set @jkills,0; set .loop,0; set .Juggernaght,getcharid(3); dispbottom "You are the new Juggernaght"; announce "The New Juggernaght is: "+rid2name(.Juggernaght)+" !",bc_blue|bc_map; 
+	  for(set .@i,0; .@i<getarraysize($@juggbuffids); set .@i,.@i+1)
+	    {sc_start $@juggbuffids[.@i],300000,$@juggbufflvl[.@i];} end;}
+   dispbottom "You need "+(5 - @kills)+" more kills to become the Juggernaght"; end;}
+attachrid killedrid;
+set @life,0; set @kills,0;
+if(.Juggernaght==getcharid(3)){set @jkills,0;}
+attachrid killerrid;
+if(.Juggernaght==killedrid && .Juggernaght!=getcharid(3))
+  {//Remove Buffs from Old Juggernaght
+   attachrid(.Juggernaght);
+   atcommand "@size 3"; atcommand "@alive";
+   sleep2 1; warp strcharinfo(3),0,0;
+   //for(set .@i,0; .@i<getarraysize($@juggbuffids); set .@i,.@i+1)
+	//{sc_end $@juggbuffids[.@i];}
+   //New Juggernaght Below
+   attachrid killerrid;
+   getitem $pitem,$pamt; set @jkills,0; set .loop,0; set .Juggernaght,getcharid(3); dispbottom "You are the new Juggernaght"; announce "The new Juggernaght is: "+rid2name(.Juggernaght)+" !",bc_blue|bc_map; 
+   atcommand "@size 2";
+   for(set .@i,0; .@i<getarraysize($@juggbuffids); set .@i,.@i+1)
+	 {sc_start $@juggbuffids[.@i],300000,$@juggbufflvl[.@i];} end;}
+if(getcharid(3)==.Juggernaght)
+  {set @kills,0; set @jkills,@jkills+1; 
+   //if(@jkills>=10)
+   //  {getitem $pitem,$pamt; set @jkills,0; end;} 
+   getitem $pitem,$pamt; end;} //getitem $pitem,@jkills;
+set @kills,0;
+end;
+}
+
+//mapname	mapflag	pvp
+evt_zombie	mapflag	pvp_noparty
+evt_zombie	mapflag	pvp_noguild
+evt_zombie	mapflag	partylock
+evt_zombie	mapflag	nopenalty
+evt_zombie	mapflag	nobranch
+evt_zombie	mapflag	nomemo
+evt_zombie	mapflag	noreturn
+evt_zombie	mapflag	nowarp
+evt_zombie	mapflag	nowarpto
+evt_zombie	mapflag	noteleport
+evt_zombie	mapflag	pvp_nocalcrank
+evt_zombie	mapflag	nosave	SavePoint

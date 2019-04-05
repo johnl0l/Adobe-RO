@@ -1,0 +1,77 @@
+//==============================================================//
+//   _    _ _____     _____           _       _                 //
+//  | |  | |  __ \   / ____|         (_)     | |                //
+//  | |__| | |  | | | (___   ___ _ __ _ _ __ | |_ ___           //
+//  |  __  | |  | |  \___ \ / __| '__| | '_ \| __/ __|          //
+//  | |  | | |__| |  ____) | (__| |  | | |_) | |_\__ \          //
+//  |_|  |_|_____/  |_____/ \___|_|  |_|_.__/ \__|___/          //
+//   Hurican Dooders Script's ™      | |                        //
+//                                   |_|                        //
+//                                                              //
+// Sloteador de itens, setados nas confs                        //
+// Versão 1.0                                                   //
+// Compatibilidade: Cronus & brAthena                           //
+//==============================================================//
+
+prontera,150,150,5	script	Sloteador	92,{
+
+//==================== Configurações ======================//
+							   //
+set .name$,"[Sloteador]";	// Nome do NPC		   //
+set $ID, 1121;  		// Pedir ex.: Alfange [0]  //
+set $ID2, 1119; 		// Dar	ex.: Alfange [1]   //
+set $chance, 25; 		// Porcentagem = 25%	   //
+						   	   //
+//==================== Fim dasConfigurações ===============//
+
+	mes .name$;
+	mes "Olá "+strcharinfo(0);
+	mes "Posso slotar um item para você?";
+	if(select("- Sim:- Não") == 2) close;
+	next;
+
+		mes .name$;
+		mes "Tudo bem, eu posso slotar o item ^0000EE"+getitemname($ID)+" [0]^000000 por";
+		mes "um ^0000EE"+getitemname($ID2)+" [1]^000000, mas com chance de 25% apenas...";
+		next;
+		mes .name$;
+		mes "Mas se eu falhar, o item será deletado do seu inventário...";
+		mes "Se quiser, posso fazer agora, eu só preciso do item para tentar slotar.";
+		next;
+		mes .name$;
+		mes "Posso fazer minha mágica?";
+		if(select("- Sim:- Não") == 2 ) close;
+
+		
+		if(countitem($ID) == 0){
+			mes "Você está sem o item necessário, volte mais tarde.";
+			close;
+		}
+		next;
+		mes .name$;
+		mes "Processando...";
+		sleep2 2000;
+		next;
+		mes .name$;
+		mes "Quase lá...";
+		sleep2 2000;
+		next;
+		if(rand(1,100) <= $chance){
+		mes .name$;
+		mes "Pronto, seu item foi confeccionado com sucesso!";
+		next;
+		announce "[Slot]: O jogador "+strcharinfo(0)+" slotou uma "+getitemname($ID2)+" [1]!",8;
+		getitem $ID2,1;
+		delitem $ID,1;
+		close;
+
+		} else {
+		next;
+		mes .name$;
+		mes "Que pena, seu item foi perdido...";
+		delitem $ID,1;
+		close;
+	}
+}
+
+//===============================  Recuse imitações ==============================//

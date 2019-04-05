@@ -1,0 +1,128 @@
+//===============================================================//
+//   _    _ _____     _____           _       _                  //
+//  | |  | |  __ \   / ____|         (_)     | |                 //
+//  | |__| | |  | | | (___   ___ _ __ _ _ __ | |_ ___            //
+//  |  __  | |  | |  \___ \ / __| '__| | '_ \| __/ __|           //
+//  | |  | | |__| |  ____) | (__| |  | | |_) | |_\__ \           //
+//  |_|  |_|_____/  |_____/ \___|_|  |_| .__/ \__|___/           //
+//   Hurican Dooders Script's ™      | |                         //
+//                                   |_|                         //
+//                                                               //
+// Ativa e Desativa npcs com um simples comando.                 //
+// Versão 1.0                                                    //
+// Compatibilidade: Cronus & brAthena                            //
+// OBS: Altere a variável @pastanpc$ ( Pasta onde fica seus npcs //
+// personalizados. Altere corretamente. Deixe sem o "/" no final //
+//===============================================================//
+
+-	script	npc	-1,{
+
+OnWhisperGlobal:
+//====================== Configurações ==========================//
+								 //
+set @cnpc$,"[^0000EEControle de NPC^000000]";    		 //
+set @pastanpc$,"npc/custom";   		 //
+								 //
+//====================== Fim das Configurações ==================//
+
+if(getgmlevel() >= 80){
+		mes @cnpc$;
+		mes "Olá "+strcharinfo(0);
+		mes "O que deseja?";
+		next;
+		switch(select("- Ativar NPC","- Desativar NPC","- Atualizar NPC","- Último NPC","- Sair")){
+	case 1:
+		mes @cnpc$;
+		mes "Digite o nome do arquivo.";
+		mes "O arquivo tem que estar em:";
+		mes "^CC0000"+@pastanpc$+"^000000";
+		mes "Ex: ativador (sem .txt)";
+		input @ativa$;
+		next;
+		mes @cnpc$;
+		mes "Está certo?";
+		mes ""+@pastanpc$+"/^CC0000"+@ativa$+"^000000.txt ?";
+		if(select("- Sim","- Não") == 2){ next; mes @cnpc$; mes "Tudo bem, até logo!"; close; }
+				next;
+				mes @cnpc$;
+				mes "Tudo bem, carregando...";
+				atcommand "@loadnpc "+@pastanpc$+"/"+@ativa$+".txt";
+				next;
+				mes @cnpc$;
+				mes "NPC Ativado!";
+				close;
+	case 2:
+		mes @cnpc$;
+		mes "Digite o nome do NPC.";
+		mes "Ex: Controle de NPC";
+		next;
+		input @desativa$;
+		next;
+		mes @cnpc$;
+		mes "Está certo?";
+		mes "Nome: ^CC0000"+@desativa$+"^000000";
+		if(select("- Sim","- Não") == 2){ next; mes @cnpc$; mes "Tudo bem, até logo!"; close; }
+				next;
+				mes @cnpc$;
+				mes "Tudo bem, desativando...";
+				atcommand "@unloadnpc "+@desativa$;
+				next;
+				mes @cnpc$;
+				mes "NPC Desativado!";
+				close;
+	case 3:
+		mes @cnpc$;
+		mes "Digite o nome do NPC.";
+		mes "Ex: Controle de NPC";
+		next;
+		input $atualiza$;
+		next;
+		mes @cnpc$;
+		mes "Agora digite o nome do arquivo.";
+		mes "Ex: ativador (sem .txt)";
+		mes "^0000EELembrando que o arquivo deve estar na pasta "+@pastanpc$+"^000000!";
+		next;
+		input $atualizan$;
+		next;
+		mes "Está certo?";
+		mes "Nome do NPC: ^CC0000"+$atualiza$+"^000000";
+		mes "Nome do Arquivo: ^CC0000"+$atualizan$+"^000000.txt";
+		if(select("- Sim","- Não") == 2){ next; mes @cnpc$; mes "Tudo bem, até logo!"; close; }
+				next;
+				mes @cnpc$;
+				mes "Atualizando...";
+				atcommand "@unloadnpc "+$atualiza$;
+				sleep2 10;
+				atcommand "@loadnpc "+@pastanpc$+"/"+$atualizan$+".txt";
+				next;
+				mes @cnpc$;
+				mes "NPC Atualizado!";
+				close;
+	case 4:
+		next;
+		mes @cnpc$;
+		mes "Seu último NPC foi:";
+		mes "Nome: ^CC0000"+$atualiza$+"^000000";
+		mes "Arquivo: ^CC0000"+$atualizan$+"^000000.txt";
+		next;
+		mes @cnpc$;
+		mes "Quer atualizá-lo?";
+		if(select("- Sim","- Não") == 2){ next; mes @cnpc$; mes "Tudo bem, até logo!"; close; }
+				next;
+				mes @cnpc$;
+				mes "Atualizando...";
+				atcommand "@unloadnpc "+$atualiza$;
+				sleep2 10;
+				atcommand "@loadnpc "+@pastanpc$+"/"+$atualizan$+".txt";
+				next;
+				mes @cnpc$;
+				mes "NPC Atualizado!";
+				close;
+	case 5:
+		mes @cnpc$; 
+		mes "Tudo bem, até logo!";
+		close;
+
+		}
+	}
+}

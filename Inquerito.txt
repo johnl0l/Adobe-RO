@@ -1,0 +1,249 @@
+//  _______________________________________________________
+// /													   \
+// |	   _		   _   _   _							|
+// |	  | |__  _ __ / \ | |_| |__   ___ _ __   __ _	   	|
+// |	  | '_ \| '__/ _ \| __| '_ \ / _ \ '_ \ / _` |	  	|
+// |	  | |_) | | / ___ \ |_| | | |  __/ | | | (_| |	  	|
+// |	  |_.__/|_|/_/   \_\__|_| |_|\___|_| |_|\__,_|	 	|
+// |														|
+// |				 brAthena Script						|
+// |--------------------------------------------------------|
+// | Nome do Script: Inquérito								|
+// |--------------------------------------------------------|
+// | Criado por: Emistry									|									
+// |--------------------------------------------------------|
+// | Versões rA/brA: 1.0/1.1								|
+// |--------------------------------------------------------|
+// | Descrição:												|
+// | Este é um NPC que permite aos jogadores escreverem uma	| 
+// | mensagem e enviar para Equipe GM.						|
+// | Os GM/ADMS da equipe poderão responder às mensagens 	|
+// | escritas  pelos jogadores e haverá notificação após o 	|
+// | login, se há  novas mensagens.							|
+// | Certifique-se de ter colocado a Tabela SQL antes do NPC|
+// | ser usado em seu servidor.								|
+// |														|
+// |--------------------------------------------------------|
+// | Changelog:			   									|
+// |[1.0] - Permitir aos jogadores enviar mensagens a 		|
+// | Equipe GM e GM capaz de ler e responder. 				|
+// |[1.1] - Traduzido para brAthena [hail]					|
+// \_______________________________________________________/
+// Carregar a tabela de SQL no seu servidor antes de usar o NPC
+	
+/*
+	
+CREATE TABLE IF NOT EXISTS `E-Inquiry` (
+	`ID` bigint(20) unsigned NOT NULL auto_increment,
+	`Sender_ID` int(11) unsigned NOT NULL default '0',
+	`Sender_Name` varchar(30) NOT NULL default '',
+	`Title` text,
+	`Message` text,
+	`Status` tinyint(2) NOT NULL default '0',
+	`Inquiry_Time` datetime NOT NULL default '0000-00-00 00:00:00',
+	`Reply` text,
+	`Reply_Time` datetime NOT NULL default '0000-00-00 00:00:00',
+	`Reply_Name` varchar(30) NOT NULL default '',
+	PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM;
+
+*/
+
+-	script	E-Inquiry	-1,{
+
+OnStartMenu:
+mes "Se você estiver com problemas, poderá informar a equipe. Deseja fazer uma denúncia?";
+next;
+switch( select( "Ver Mensagens",
+				"Escrever Mensagens",
+				( getgmlevel() < .GMLevel )?"":"^FF0000[ GM ]^000000 Gerenciar Mensagens" )){
+
+Case 1:
+	do{
+		mes "Quais os tipos de mensagens que você gostaria de ver?";
+		for( set .@i,0; .@i < 3; set .@i,.@i + 1 )
+			set .@Found[.@i],query_sql("SELECT `ID` FROM `E-Inquiry` WHERE `Status` = "+.@i+" AND `Sender_ID`='"+getcharid(3)+"'",.@ID );
+
+		set .@Msg,select("^FF0000Mensagens sem resposta [ ^FF0000"+.@Found[0]+"^000000 ]",
+						"^0000FFMensagens respondidas^000000 [ ^FF0000"+.@Found[1]+"^000000 ]",
+						"Mensagens arquivadas [ ^FF0000"+.@Found[2]+"^000000 ]" ) - 1;
+		set .@Replied,query_sql(" SELECT `ID`,`Title`,`Message`,`Inquiry_Time`,`Reply`,`Reply_Time`,`Reply_Name` FROM `E-Inquiry` WHERE `Status`= "+.@Msg+" AND `Sender_ID`='"+getcharid(3)+"' ",.@ID, .@Title$,.@Message$,.@Time$,.@Reply$,.@ReplyTime$,.@ReplyName$ );
+		if( !.@Replied ){
+			mes "Você não tem mensagens para ler.";
+			next;
+		}else{
+			set .@Menu$,"";
+			for( set .@i,0; .@i < .@Replied; set .@i,.@i + 1 )
+				set .@Menu$,.@Menu$ + "^FF0000[ "+( .@i+1 )+". ]^0000FF "+.@Title$[.@i]+":";
+			next;
+			set .@Select,select( .@Menu$ ) - 1;
+			mes "^00FF00____________________________^000000";
+			mes "^FF0000Data :^000000 : "+.@Time$[.@Select];
+			mes "^FF0000Título^000000 : "+.@Title$[.@Select];
+			mes "^00FF00____________________________^000000";
+			mes "^FF0000Mensagens^000000 : "+.@Message$[.@Select];
+			mes "^00FF00____________________________^000000";
+			if( .@Msg > 0 ){
+				mes "^0000FFResposta de ^FF0000"+.@ReplyName$[.@Select]+" ^000000 : "+.@Reply$[.@Select];
+				mes "^00FF00____________________________^000000";
+				mes "^0000FFTempo ^000000 : "+.@ReplyTime$[.@Select];
+			}
+			next;
+			set .@MsgOpt1,select("Ler outras Mensagens",( .@Msg == 1 )?"Mover para Arquivados":"","Deletar Mensagem" );
+			switch( .@MsgOpt1 ){
+				Case 2:
+					query_sql("UPDATE `E-Inquiry` SET `Status` = 2 WHERE `ID` = "+.@ID[.@Select]+" ");
+					mes "A Mensagem foi movida para Arquivados";
+					break;
+				Case 3:
+					query_sql("DELETE FROM `E-Inquiry` WHERE `ID` = "+.@ID[.@Select]+" ");
+					mes "A Mensagem foi apagada.";
+					break;
+				default:
+					break;
+			}
+		}
+	}while( .@MsgOpt1 < 3 );
+	break;
+
+Case 2:
+	mes "^00FF00____________________________^000000";
+	mes "^FF0000NOTA :^000000 Todas as Mensagens serão gravadas para referências futuras, por isso, não abuse deste serviço. Caso contrário, serão tomadas as medidas necessárias";
+	do{
+		next;
+		mes "^00FF00____________________________^000000";
+		mes "^FF0000Título^000000 : "+.@Title$;
+		mes "^00FF00____________________________^000000";
+		mes "^FF0000Mensagens^000000 : "+.@Message$;
+		mes "^00FF00____________________________^000000";
+	
+		next;
+		set .@Select,select(( .@Title$ == "" )?"[ ^FF0000Incompleto^000000 ] Título":"[ ^0000FFCompletado^000000 ] Título",
+							( .@Message$ == "" )?"[ ^FF0000Incompleto^000000 ] Mensagem":"[^0000FFCompletado^000000 ] Título",
+							( .@Title$ == "" || .@Message$ == "" )?"":"^FF0000ENVIAR MENSAGEM^000000" );
+	
+		switch( .@Select ){
+			Case 1:
+				mes "Digite um Título para o seu problema";
+				input .@Title$;
+				break;
+			Case 2:
+				mes "Explique brevemente o que é o seu problema";
+				set .@i,0;
+				do{
+					input getd(".@Message"+.@i+"$");
+					set .@Message$,.@Message$ + getd(".@Message"+.@i+"$")+" ";
+					set .@Continue,select("Completo:Continuar Mensagem");
+				}while( .@Continue == 2 );
+				break;
+			default: 
+				mes "Sua mensagem foi enviada.";
+				query_sql( "INSERT INTO `E-Inquiry` ( `Sender_ID`,`Sender_Name`,`Title`,`Message`,`Status`,`Inquiry_Time` ) VALUES ( "+getcharid(3)+",'"+escape_sql(strcharinfo(0))+"','"+escape_sql(.@Title$)+"','"+escape_sql(.@Message$)+"',0,'"+gettimestr("%Y-%m-%d %H:%M:%S",21)+"' ) ");
+				break;
+		}
+	}while( .@Select != 3 );
+	break;
+	
+Case 3:
+	do{
+	mes "Tudo bem, Qual o próximo ?";
+	next;
+	for( set .@i,0; .@i < 3; set .@i,.@i + 1 )
+		set .@Found[.@i],query_sql("SELECT `ID` FROM `E-Inquiry` WHERE `Status` = "+.@i+"",.@ID );
+
+	set .@Types,select("^FF0000Ler todas as mensagens não lidas [ ^FF0000"+.@Found[0]+"^000000 ]",
+						"Ler todas mensagens respondidas^000000 [ ^FF0000"+.@Found[1]+"^000000 ]",
+						"Ler todas mensagens arquivadas [ ^FF0000"+.@Found[2]+"^000000 ]" ) - 1;
+
+	set .@ManageMSG,query_sql(" SELECT `ID`,`Sender_Name`,`Title`,`Message`,`Inquiry_Time`,`Reply`,`Reply_Time`,`Reply_Name` FROM `E-Inquiry` WHERE `Status`= "+.@Types+" LIMIT 127",.@ID,.@Sender$, .@Title$,.@Message$,.@Time$,.@Reply$,.@ReplyTime$,.@ReplyName$ );
+		if( !.@ManageMSG ){
+			mes "Você não tem Mensagens para ler.";
+			next;
+		}else{
+			set .@Menu$,"";
+				for( set .@i,0; .@i < .@ManageMSG; set .@i,.@i + 1 )
+				set .@Menu$,.@Menu$ +"^FF0000[ "+( .@i+1 )+". ]^0000FF "+.@Title$[.@i]+":";
+			next;
+			set .@Select,select( .@Menu$ ) - 1;
+			mes "^00FF00____________________________^000000";
+			mes "^FF0000Data :^000000 : "+.@Time$[.@Select];
+			mes "^FF0000Altor :^000000 : "+.@Sender$[.@Select];
+			mes "^FF0000Título^000000 : "+.@Title$[.@Select];
+			mes "^00FF00____________________________^000000";
+			mes "^FF0000Mensagens^000000 : "+.@Message$[.@Select];
+			mes "^00FF00____________________________^000000";
+			if( .@Types > 0 ){
+				mes "^0000FFResposta de ^FF0000"+.@ReplyName$[.@Select]+" ^000000 : "+.@Reply$[.@Select];
+				mes "^00FF00____________________________^000000";
+				mes "^0000FFTempo ^000000 : "+.@ReplyTime$[.@Select];
+			}
+			next;
+			set .@MsgOpt1,select( ( .@Types == 2 )?"":"Responder mensagem","Ver outras mensagens","Deletar mensagem" );
+			switch( .@MsgOpt1 ){
+				Case 1:
+					set .@i,0;
+					do{
+						input getd(".@Reply"+.@i+"$");
+						set .@Reply$,.@Reply$ + getd(".@Reply"+.@i+"$")+" ";
+						set .@Continue,select("Completo:Continuar Mensagens");
+					}while( .@Continue == 2 );
+					
+					query_sql("UPDATE `E-Inquiry` SET `Status` = 1,`Reply`='"+escape_sql(.@Reply$)+"',`Reply_Name`='"+escape_sql(strcharinfo(0))+"',`Reply_Time`='"+gettimestr("%Y-%m-%d %H:%M:%S",21)+"' WHERE `ID` = "+.@ID[.@Select]+" ");	
+					message strcharinfo(0),"Reply has been sent.";
+					break;
+				Case 3:
+					query_sql("DELETE FROM `E-Inquiry` WHERE `ID` = "+.@ID[.@Select]+" ");
+					mes "A mensagem foi deletada.";
+				default:
+					break;
+			}
+		}
+	}while( .@MsgOpt1 != 1 ); 
+	break;
+}
+close;
+
+OnInit:
+// Min. GM Level Ler / Gerenciar Mensagens.
+set .GMLevel,80;
+end;
+
+OnPCLoginEvent:
+if( getgmlevel() < .GMLevel ){
+	set .@Replied,query_sql("SELECT `ID` FROM `E-Inquiry` WHERE `Status` = 1 AND `Sender_ID`='"+getcharid(3)+"'",.@ID );
+	if( .@Replied )
+		message strcharinfo(0),"Você tem "+.@Replied+" mensagens respondidas da equipe.";
+}else{
+	set .@Unread,query_sql("SELECT `ID` FROM `E-Inquiry` WHERE `Status` = 0 ",.@ID );
+	if( .@Unread ) 
+		message strcharinfo(0),"A equipe recebeu "+.@Unread+" uma nova mensagem.";
+}
+if( .@Replied || .@Unread ){
+	if( select("Ler as Mensagens:Cancelar") == 2 ) close;
+		goto OnStartMenu;
+}
+end;
+
+}
+
+// Main NPC
+prontera,139,174,5	script	Inquerito#Main	757,{
+	doevent "E-Inquiry::OnStartMenu";
+}
+	
+// Duplicates NPC
+// prontera,155,181,5	duplicate(E-Inquiry#Main)	E-Inquiry#1	757
+// prontera,155,182,5	duplicate(E-Inquiry#Main)	E-Inquiry#2	757
+// prontera,155,183,5	duplicate(E-Inquiry#Main)	E-Inquiry#3	757
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+				

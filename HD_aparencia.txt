@@ -1,0 +1,66 @@
+//==============================================================//
+//   _    _ _____     _____           _       _                 //
+//  | |  | |  __ \   / ____|         (_)     | |                //
+//  | |__| | |  | | | (___   ___ _ __ _ _ __ | |_ ___           //
+//  |  __  | |  | |  \___ \ / __| '__| | '_ \| __/ __|          //
+//  | |  | | |__| |  ____) | (__| |  | | |_) | |_\__ \          //
+//  |_|  |_|_____/  |_____/ \___|_|  |_| .__/ \__|___/          //
+//   Hurican Dooders Script's ™        | |                      //
+//                                     |_|                      //
+//                                                              //
+// Muda aparência de personagens	                        //
+// Versão 1.0                                                   //
+// Compatibilidade: Cronus & brAthena                           //
+//==============================================================//
+
+sec_in02.gat,156,185,2	script	Estilista#HD	91,{
+
+/* ------------------------------------------------------------- */
+set .ap$,"[^051487Estilista^000000]";		// Nome do NPC
+setarray .@classes[1],4011,4012,4013,4014,4015;	// ID das Classes
+set .menu$,"^FFA500•^000000";	// Menu
+set .@cobrar,1;			// Cobrar Zenys? 1=Sim/0=Não
+set .@zenys,100000;		// Valor em Zenys a ser cobrado.
+/* ------------------------------------------------------------- */
+
+if(Classe)
+{
+	mes .ap$;
+	mes "Você está transformado, quer voltar ao normal?";
+	if(select(""+.menu$+" Sim"))
+		{
+			next;
+			mes .ap$;
+			mes "Transformado!";
+			changebase Class2;
+			set Classe,0;
+			close;
+		}
+}
+	mes .ap$;
+	mes "Olá, quer mudar seu estilo de personagem?";
+	if(select(""+.menu$+" Sim:"+.menu$+" Não") == 2) close;
+
+	next;
+	mes .ap$;
+	mes "Selecione uma opção de Classe:";
+	for (set .@i,1; .@i < getarraysize(.@classes); set .@i, .@i + 1)
+	set .@menu$,.@menu$ + ""+.menu$+" " + jobname(.@classes[.@i]) + ":";
+	if(select(.@menu$+""+.menu$+" Cancelar") >= getarraysize(.@classes))close;
+	next;
+	set @escolha,@menu;
+	mes .ap$;
+	mes "Quer mesmo deixar seu char com a aparência de um "+jobname(.@classes[@escolha])+"?";
+	if(.@cobrar){ mes "Custará "+.@zenys+" Zenys."; }
+	next;
+	if(select(""+.menu$+" Sim:"+.menu$+" Não") == 2)close;
+		next;
+		if(Zeny < .@zenys){ mes .ap$; mes "Você não tem a quantidade de zenys suficientes..."; close; }
+		if(.@cobrar && .@zenys >= 1) set Zeny,Zeny - .@zenys;
+		changebase .@classes[@escolha];
+		mes .ap$;
+		mes "Transformado!";
+		set Class2,Class;
+		set Classe,1;
+		close;
+}
