@@ -1,0 +1,88 @@
+//  _______________________________________________________
+// /													   \
+// |	   _		   _   _   _							|
+// |	  | |__  _ __ / \ | |_| |__   ___ _ __   __ _	   	|
+// |	  | '_ \| '__/ _ \| __| '_ \ / _ \ '_ \ / _` |	  	|
+// |	  | |_) | | / ___ \ |_| | | |  __/ | | | (_| |	  	|
+// |	  |_.__/|_|/_/   \_\__|_| |_|\___|_| |_|\__,_|	 	|
+// |														|
+// |				 brAthena Script						|
+// |--------------------------------------------------------|
+// | Nome do Script: Runas DOTA								|
+// |--------------------------------------------------------|
+// | Criado por: Emistry									|									
+// |--------------------------------------------------------|
+// | Versões rA/brA: 2.0/2.1								|
+// |--------------------------------------------------------|
+// | Descrição:												|
+// | Ele vai dar aos jogadores  Buff/Bônus aleatoriamente.	|	
+// |														|
+// |--------------------------------------------------------|
+// | Changelog:			   									|
+// |[1.0] Um simples roteiro de DotA Runas que dar aos 		|
+// |	jogadores bônus / buffs.							|
+// |[2.0] Adicionado aleatórios de Spawn coordenadas, 		|
+// |	problemas de configuração / Fixo de camuflagem.		|
+// |[2.1] - Traduzido para brAthena [hail]					|
+// \_______________________________________________________/
+//http://rathena.org/board/topic/57784-request-dota-runes/page__fromsearch__1
+
+prontera,1,1,5	script	Runas	757,2,2,{
+dispbottom "Passo a passo para obter Runas.";
+end;
+
+OnTouch:
+	switch( .Runes ){
+		Case 1:
+			sc_start SC_INCATKRATE,( .Duration * 1000 ),100;
+			sc_start SC_INCMATKRATE,( .Duration * 1000 ),100;
+			break;
+		Case 2:
+			skill "AS_CLOAKING",10,1;
+			sc_start SC_CLOAKING,( .Duration * 1000 ),10;
+			break;
+		Case 3:
+			sc_start4 SC_REGENERATION,( .Duration * 1000 ),-10,1,0,0;
+			break;
+		Case 4:
+			getmapxy( .@Map$,.@X,.@Y,0,strcharinfo(0) );
+			clone .@Map$,.@X,.@Y,"",getcharid(0),getcharid(0),"",1,.Duration;
+			clone .@Map$,.@X,.@Y,"",getcharid(0),getcharid(0),"",1,.Duration;
+			break;
+		Case 5:
+			sc_start SC_SpeedUp1,( .Duration * 1000 ),0;
+			break;
+		default: end;
+	}
+	announce "[ "+strcharinfo(0)+" ] ganhou"+.Names$[.Runes]+".",bc_self,0x00FF00;
+	hideonnpc strnpcinfo(0);
+	delwaitingroom;
+	set .Runes,0;
+	set .RuneDelay,gettimetick(2) + .Duration;
+	while( .RuneDelay > gettimetick(2) ) sleep2 1000;
+	
+OnInit:
+// Duração das Runas em segundos
+set .Duration,60;
+
+// Nome de cada Runa.
+setarray .Names$[1],
+				"Double Damage",	//	2 x ATK Rate
+				"Invisibility",		//	Cloaking
+				"Regeneration",		//	HP / SP Regeneration
+				"    Clone",		//	Create 2 Clones
+				"    Haste";		//	Improve Movement Speed
+			
+// Coordenada aleatórios onde será mostrado novamente o NPC
+setarray .CoordinateX[0],150,155;
+setarray .CoordinateY[0],175,175;
+
+sc_end SC_CLOAKING;
+sc_end SC_REGENERATION;
+set .Random,rand( getarraysize( .CoordinateX ) );
+movenpc strnpcinfo(0),.CoordinateX[ .Random ],.CoordinateY[ .Random ];
+hideoffnpc strnpcinfo(0);
+if( !.Runes ) set .Runes,rand( 1,( getarraysize( .Names$ ) - 1 ) );
+if( .Runes ) waitingroom "   "+.Names$[.Runes],0;
+end;
+}

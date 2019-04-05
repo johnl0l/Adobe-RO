@@ -1,0 +1,100 @@
+sec_in02.gat,139,141,2	script	Recarregador	868,{
+
+set @name$,"[^a800ff Recarregador ^000000]"; // Nome do NPC
+set @nivel,99; // Nível necessário para poder recarregar alguma coisa
+
+mes @name$;
+mes "Olá ^FF6699"+strcharinfo(0)+"^000000!";
+next;
+mes @name$;
+mes "O que você deseja?";
+menu "Reeniciar NPC's",L_rn,"Reeniciar Database",L_rdb,"Reeniciar Battle Conf",L_rbc,"Reeniciar contas de GM",L_rg,"Nada, obrigado.",-;
+next;
+mes @name$;
+mes "Ok. Vá com Deus!";
+close;
+
+L_rn:
+next;
+if(getgmlevel() == @nivel){
+mes @name$;
+mes "Deseja realmente reeniciar NPC's?";
+menu "Sim, por favor.",-,"Não, obrigado.",L_nv;
+next;
+atcommand "@reloadscript";
+next;
+mes @name$;
+mes "Prontinho, NPC's recarregados!";
+close;
+}else{
+next;
+mes @name$;
+mes "Você não é GM nível ^FF0000"+@nivel+"^000000";
+close;
+}
+
+L_rdb:
+next;
+if(getgmlevel() == @nivel){
+mes @name$;
+mes "Deseja realmente reeniciar a Database?";
+menu "Sim, por favor.",-,"Não, obrigado.",L_nv;
+next;
+atcommand "@reloadpcdb";
+next;
+mes @name$;
+mes "Prontinho, database recarregada!";
+close;
+}else{
+next;
+mes @name$;
+mes "Você não é GM nível ^FF0000"+@nivel+"^000000";
+close;
+}
+
+L_rbc:
+next;
+if(getgmlevel() == @nivel){
+mes @name$;
+mes "Deseja realmente reeniciar a Battle Conf?";
+menu "Sim, por favor.",-,"Não, obrigado.",L_nv;
+next;
+atcommand "@reloadbattleconf";
+next;
+mes @name$;
+mes "Prontinho, configurações recarregadas!";
+close;
+}else{
+next;
+mes @name$;
+mes "Você não é GM nível ^FF0000"+@nivel+"^000000";
+close;
+}
+
+L_rg:
+next;
+if(getgmlevel() == @nivel){
+mes @name$;
+mes "Deseja realmente reeniciar a database dos GM's?";
+menu "Sim, por favor.",-,"Não, obrigado.",L_nv;
+next;
+L_gmdb:
+atcommand "@reloadgmdb";
+next;
+mes @name$;
+mes "Prontinho, database dos GM's recarregadas!";
+close;
+}else{
+next;
+mes @name$;
+mes "Você não é GM nível ^FF0000"+@nivel+"^000000";
+close;
+}
+
+L_nv:
+next;
+mes @name$;
+mes "Volte quando precisar de mim!";
+close;
+
+}
